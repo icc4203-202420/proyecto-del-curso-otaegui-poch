@@ -27,7 +27,3 @@ services:
 
 volumes:
   postgres_data:
-
-
-
-#esto es una pruebaaa
