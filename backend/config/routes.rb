@@ -18,6 +18,12 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  namespace :api do
+    namespace :v1 do
+      resources :events, only: [:show, :create, :update, :destroy]
+    end
+  end
+  
 
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
@@ -28,6 +34,9 @@ Rails.application.routes.draw do
       end
       
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
+
+      #agrego la ruta de eventos
+      resources :events, only: [:index, :show, :create, :update, :destroy]
     end
   end
 
