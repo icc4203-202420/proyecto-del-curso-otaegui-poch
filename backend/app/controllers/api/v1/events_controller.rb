@@ -19,11 +19,13 @@ module API
       def create
         @event = Event.new(event_params)
         if @event.save
-          render json: @event, status: :created
+          render json: { event: @event, message: "Image functionality is currently disabled." }, status: :created
         else
           render json: @event.errors, status: :unprocessable_entity
         end
       end
+      
+      
 
       # PATCH/PUT /api/v1/events/:id
       def update
@@ -51,7 +53,7 @@ module API
 
       # Filtros permitidos para crear/actualizar eventos
       def event_params
-        params.require(:event).permit(:name, :date, :location, :bar_id, :image)
+        params.require(:event).permit(:name, :date, :location, :bar_id)#flyer desabilitado momentaneamente
       end
 
       # Método para autenticar al usuario

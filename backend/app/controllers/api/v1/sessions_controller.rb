@@ -2,14 +2,22 @@ class API::V1::SessionsController < Devise::SessionsController
   include ::RackSessionsFix
   respond_to :json
   private
+  
   def respond_with(current_user, _opts = {})
+    token = current_user.generate_jwt
     render json: {
       status: { 
-        code: 200, message: 'Logged in successfully.',
-        data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
+        code: 200, 
+        message: 'Logged in successfully.',
+        data: {
+          user: UserSerializer.new(current_user).serializable_hash[:data][:attributes],
+          token: token
+        }
       }
     }, status: :ok
   end
+
+
   def respond_to_on_destroy
     if request.headers['Authorization'].present?
       jwt_payload = JWT.decode(

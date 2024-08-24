@@ -12,32 +12,33 @@ Rails.application.routes.draw do
     registrations: 'api/v1/registrations'
   }
 
+  root to: "home#index"
+
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Defines the root path route ("/")
-  # root "posts#index"
   namespace :api do
     namespace :v1 do
       resources :events, only: [:show, :create, :update, :destroy]
     end
   end
   
-
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
-      resources :bars
+      resources :bars, only: [:index, :show, :create, :update, :destroy]
       resources :beers
       resources :users do
+        member do
+          get 'friendships'
+          post 'friendships', to: 'users#create_friendship'
+        end
         resources :reviews, only: [:index]
       end
       
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
 
-      #agrego la ruta de eventos
       resources :events, only: [:index, :show, :create, :update, :destroy]
     end
   end
-
 end

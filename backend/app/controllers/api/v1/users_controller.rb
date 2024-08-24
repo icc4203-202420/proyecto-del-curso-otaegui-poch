@@ -1,13 +1,13 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
-  before_action :set_user, only: [:show, :update]  
-  
+  before_action :set_user, only: [:show, :update, :friendships, :create_friendship]
+  before_action :authenticate_user!
+
   def index
     @users = User.includes(:reviews, :address).all   
   end
 
   def show
-  
   end
 
   def create
@@ -18,9 +18,24 @@ class API::V1::UsersController < ApplicationController
       render json: @user.errors, status: :unprocessable_entity
     end
   end
+  
+  def friendships
+    friendships = @user.friendships
+    friends = friendships.map { |f| User.find(f.friend_id) }
+    render json: friends
+  end  
+
+  def create_friendship
+    friend = User.find(params[:friend_id])
+    
+    if Friendship.create(user_id: @user.id, friend_id: friend.id)
+      render json: { message: 'Amistad creada con éxito' }, status: :created
+    else
+      render json: { error: 'No se pudo crear la amistad' }, status: :unprocessable_entity
+    end
+  end
 
   def update
-    #byebug
     if @user.update(user_params)
       render :show, status: :ok, location: api_v1_users_path(@user)
     else

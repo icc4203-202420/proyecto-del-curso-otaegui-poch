@@ -318,6 +318,7 @@ DEPENDENCIES
   rspec-rails
   sqlite3 (~> 1.4)
   tzinfo-data
+  warden-jwt_auth
 
 RUBY VERSION
    ruby 3.3.4p94
