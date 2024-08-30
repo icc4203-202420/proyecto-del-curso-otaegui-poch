@@ -1,0 +1,16 @@
+import spacy
+
+# Cargar el modelo en español
+nlp = spacy.load("es_core_news_sm")
+
+# Función para lematizar
+def lematizar(texto):
+    texto_lematizado = [token.lemma_ for token in nlp(" ".join(texto))]
+    return texto_lematizado
+
+# Ejemplo de texto limpio (una lista de tokens)
+texto_limpio = ['hotel', 'digno', 'mencion', 'ser', 'bien', 'situar']
+
+# Lematización
+print("Texto Limpio:", texto_limpio)
+print("Texto Lematizado:", lematizar(texto_limpio))
