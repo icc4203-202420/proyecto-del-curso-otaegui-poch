@@ -32,6 +32,16 @@ function Home() {
               Search Users
             </Button>
           </Grid>
+          <Grid item>
+            <Button component={Link} to="/signup" variant="contained" color="warning" size="large">
+              Sign Up
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button component={Link} to="/login" variant="contained" color="warning" size="large">
+              Log In
+            </Button>
+          </Grid>
         </Grid>
       </Paper>
     </Container>

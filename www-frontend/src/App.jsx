@@ -4,6 +4,8 @@ import BeerList from './components/BeerList.jsx';
 import BarList from './components/BarList.jsx';
 import EventList from './components/EventList.jsx';
 import UserSearch from './components/UserSearch.jsx';
+import SignUp from './components/sign-in/SignUp.jsx';
+import LogIn from './components/sign-in/LogIn.jsx';
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
         <Route path="/bars" element={<BarList />} />
         <Route path="/events" element={<EventList />} />
         <Route path="/search" element={<UserSearch />} />
+        <Route path="/signup" element={<SignUp />} /> 
+        <Route path="/login" element={<LogIn />} /> 
       </Routes>
     </Router>
   );
