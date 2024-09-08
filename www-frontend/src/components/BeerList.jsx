@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, TextField, List, ListItem } from '@mui/material';
 import axios from 'axios';
+import { BeerCard } from './BeerCard';
 
 const BeerList = () => {
   const [beers, setBeers] = useState([]);
@@ -9,14 +10,21 @@ const BeerList = () => {
   useEffect(() => {
     const fetchBeers = async () => {
       try {
-        const response = await axios.get('/api/v1/beers');
-        setBeers(response.data);
+        const response = await axios.get('http://localhost:3001/api/v1/beers');
+        console.log('entro')
+        console.log('jjajjajaja', response)
+        setBeers(response.data.beers);
       } catch (error) {
+        console.log('error', error)
         console.error("Error fetching beers:", error);
       }
     };
     fetchBeers();
   }, []);
+
+  const filteredBeers = beers.filter(beer =>
+    beer.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <Container>
@@ -28,9 +36,10 @@ const BeerList = () => {
         onChange={(e) => setSearch(e.target.value)}
         sx={{ marginBottom: 2 }}
       />
+      
       <List>
-        {beers.filter(beer => beer.name.toLowerCase().includes(search.toLowerCase())).map(beer => (
-          <ListItem key={beer.id}>{beer.name}</ListItem>
+        {filteredBeers.map(beer => (
+          <BeerCard beer = {beer} />
         ))}
       </List>
     </Container>

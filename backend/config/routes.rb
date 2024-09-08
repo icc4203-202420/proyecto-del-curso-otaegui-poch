@@ -28,7 +28,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :bars, only: [:index, :show, :create, :update, :destroy]
       resources :beers
-      resources :users do
+      resources :users, only: [:show, :create, :update] do
         member do
           get 'friendships'
           post 'friendships', to: 'users#create_friendship'

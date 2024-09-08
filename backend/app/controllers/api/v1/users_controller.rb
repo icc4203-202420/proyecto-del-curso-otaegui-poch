@@ -1,13 +1,14 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
   before_action :set_user, only: [:show, :update, :friendships, :create_friendship]
-  before_action :authenticate_user!
+  before_action :authenticate_user!, only: [:update, :create_friendship]
 
   def index
     @users = User.includes(:reviews, :address).all   
   end
 
   def show
+    render json: @user, include: [:reviews, :address], status: :ok
   end
 
   def create
@@ -19,19 +20,36 @@ class API::V1::UsersController < ApplicationController
     end
   end
   
+  # GET /api/v1/users/:id/friendships
+
   def friendships
-    friendships = @user.friendships
-    friends = friendships.map { |f| User.find(f.friend_id) }
-    render json: friends
-  end  
+    friends = User.joins(:friendships)
+                  .where(friendships: { user_id: @user.id })
+                  .or(User.joins(:friendships)
+                  .where(friendships: { friend_id: @user.id }))
+                  .where.not(id: @user.id)
+  
+    if friends.any?
+      render json: friends, status: :ok
+    else
+      render json: { error: "No friendships found for user with ID #{@user.id}" }, status: :not_found
+    end
+  end
+
+
+  # POST /api/v1/users/:id/friendships
 
   def create_friendship
-    friend = User.find(params[:friend_id])
-    
-    if Friendship.create(user_id: @user.id, friend_id: friend.id)
-      render json: { message: 'Amistad creada con éxito' }, status: :created
+    friend = User.find_by(id: friendship_params[:friend_id])
+    if friend
+      friendship = @user.friendships.build(friend_id: friend.id, bar_id: friendship_params[:bar_id])
+      if friendship.save
+        render json: { message: 'Friendship created successfully' }, status: :created
+      else
+        render json: friendship.errors, status: :unprocessable_entity
+      end
     else
-      render json: { error: 'No se pudo crear la amistad' }, status: :unprocessable_entity
+      render json: { error: 'Friend not found' }, status: :not_found
     end
   end
 
@@ -51,10 +69,14 @@ class API::V1::UsersController < ApplicationController
 
   def user_params
     params.fetch(:user, {}).
-        permit(:id, :first_name, :last_name, :email, :age,
+        permit(:id, :first_name, :last_name, :email, :age, :handle,
             { address_attributes: [:id, :line1, :line2, :city, :country, :country_id, 
               country_attributes: [:id, :name]],
               reviews_attributes: [:id, :text, :rating, :beer_id, :_destroy]
             })
+  end
+
+  def friendship_params
+    params.require(:friendship).permit(:friend_id, :bar_id)
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_22_231507) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_05_213743) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -44,7 +44,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_22_231507) do
     t.string "line2"
     t.string "city"
     t.integer "country_id", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["country_id"], name: "index_addresses_on_country_id"
@@ -148,8 +148,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_22_231507) do
     t.datetime "updated_at", null: false
     t.datetime "start_date"
     t.datetime "end_date"
-    t.string "location"
-    t.string "image"
     t.index ["bar_id"], name: "index_events_on_bar_id"
   end
 

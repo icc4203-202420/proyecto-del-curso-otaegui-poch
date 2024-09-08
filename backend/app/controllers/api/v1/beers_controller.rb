@@ -8,6 +8,10 @@ class API::V1::BeersController < ApplicationController
 
   # GET /beers
   def index
+    
+    puts "Token recibido:"
+        
+    Rails.logger.debug("Token recibido: ")
     @beers = Beer.all
     render json: { beers: @beers }, status: :ok
   end

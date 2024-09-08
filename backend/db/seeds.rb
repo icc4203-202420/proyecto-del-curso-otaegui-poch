@@ -36,7 +36,7 @@ if Rails.env.development?
 
   # Crear eventos asociados a los bares
   events = bars.map do |bar|
-    FactoryBot.create(:event, bar: bar)
+    FactoryBot.create(:event, bar: bar, name: "Event at #{bar.address.city}", date: 1.week.from_now)
   end
 
   # Crear relaciones de amistad entre usuarios
