@@ -39,7 +39,7 @@ const BeerList = () => {
       
       <List>
         {filteredBeers.map(beer => (
-          <BeerCard beer = {beer} />
+          <BeerCard key={beer.key} beer = {beer} />
         ))}
       </List>
     </Container>
