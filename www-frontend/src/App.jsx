@@ -6,6 +6,7 @@ import EventList from './components/EventList.jsx';
 import UserSearch from './components/UserSearch.jsx';
 import SignUp from './components/sign-in/SignUp.jsx';
 import LogIn from './components/sign-in/LogIn.jsx';
+import ReviewBeer from './components/ReviewBeer';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/search" element={<UserSearch />} />
         <Route path="/signup" element={<SignUp />} /> 
         <Route path="/login" element={<LogIn />} /> 
+        <Route path="/review/:beerId" element={<ReviewBeer />} />
       </Routes>
     </Router>
   );

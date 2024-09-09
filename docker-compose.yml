@@ -18,6 +18,7 @@ services:
       REDIS_URL: redis://redis:6379/0
     command: ./bin/rails server -b 0.0.0.0 -p 3001
     depends_on:
+    
       - redis
 
   frontend:

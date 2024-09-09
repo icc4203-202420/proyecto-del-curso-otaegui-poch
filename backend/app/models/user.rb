@@ -7,20 +7,19 @@ class User < ApplicationRecord
     jwt_revocation_strategy: self
 
   validates :first_name, :last_name, presence: true, length: { minimum: 2 }
-  validates :email, email: true
+  validates :email, presence: true, email: true
   validates :password, presence: true
   validates :handle, presence: true, uniqueness: true, length: { minimum: 3 }
 
   has_many :reviews
   has_many :beers, through: :reviews
-  has_one :address
+  has_one :address, dependent: :destroy
 
   has_many :attendances
   has_many :events, through: :attendances
   has_many :friendships
 
-  accepts_nested_attributes_for :reviews, allow_destroy: true
-  accepts_nested_attributes_for :address, allow_destroy: true
+  accepts_nested_attributes_for :reviews, :address, allow_destroy: true
 
   # Amistades iniciadas por el usuario
   has_many :friendships

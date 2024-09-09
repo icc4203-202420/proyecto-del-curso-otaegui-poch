@@ -1,13 +1,17 @@
 module API
   module V1
     class EventsController < ApplicationController
+      include ImageProcessing
+      include Authenticable
+
       before_action :set_event, only: %i[show update destroy]
       before_action :authenticate_user!, only: %i[create update destroy]
 
       # GET /api/v1/events
       def index
-        @events = Event.all
-        render json: @events
+        bar = Bar.find(params[:bar_id])
+        events = bar.events
+        render json: events, status: :ok
       end
 
       # GET /api/v1/events/:id
@@ -18,8 +22,13 @@ module API
       # POST /api/v1/events
       def create
         @event = Event.new(event_params)
+
+        if @event.bar && @event.bar.address
+          @event.address = @event.bar.address
+        end
+
         if @event.save
-          render json: { event: @event, message: "Image functionality is currently disabled." }, status: :created
+          render json: @event, status: :created
         else
           render json: @event.errors, status: :unprocessable_entity
         end
@@ -53,18 +62,34 @@ module API
 
       # Filtros permitidos para crear/actualizar eventos
       def event_params
-        params.require(:event).permit(:name, :date, :location, :bar_id)#flyer desabilitado momentaneamente
+        params.require(:event).permit(:name, :date, :bar_id)#flyer desabilitado momentaneamente
       end
 
       # Método para autenticar al usuario
       def authenticate_user!
-        # Este método debe ser implementado según tu sistema de autenticación.
-        # Ejemplo: Devise
-        # authenticate_user! o cualquier otro método de autenticación que uses.
+        token = request.headers['Authorization']&.split(' ')&.last
+
+        puts "Token recibido: #{token}"
+        
+        Rails.logger.debug("Token recibido: #{token}")
+        
+        if token.present?
+          payload = JWT.decode(token, Rails.application.secrets.secret_key_base).first
+          @current_user = User.find(payload['user_id'])
+
+          puts "payload: #{payload}"
+          Rails.logger.debug("user: #{@current_user}")
+
+
+          
+        else
+          render json: { error: 'You need to sign in or sign up before continuing.' }, status: :unauthorized
+        end
       end
     end
   end
 end
 
   
+
 
