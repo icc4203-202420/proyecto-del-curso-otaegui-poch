@@ -4,12 +4,17 @@ import BeerList from './components/BeerList.jsx';
 import BarList from './components/BarList.jsx';
 import EventList from './components/EventList.jsx';
 import UserSearch from './components/UserSearch.jsx';
+import RegistrationForm from './components/registration/RegistrationForm.jsx';
+import LoginForm from './components/login/LoginForm.jsx';
+
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LoginForm />} />
+        <Route path="/signup" element={<RegistrationForm />} />
+        <Route path="/Home" element={<Home />} />
         <Route path="/beers" element={<BeerList />} />
         <Route path="/bars" element={<BarList />} />
         <Route path="/events" element={<EventList />} />
