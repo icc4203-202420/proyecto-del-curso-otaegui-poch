@@ -3,6 +3,8 @@ import { Grid, Typography, Paper } from '@mui/material';
 import AddressDetails from './AddressDetails';
 import UserDetails from './UserDetails';
 import SubmitButton from './SubmitButton';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -20,15 +22,21 @@ const RegistrationForm = () => {
     }
   });
 
+
+  const [errors, setErrors] = useState([]);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  const navigate = useNavigate(); 
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     const [field, subfield] = name.split('.'); // Divide el nombre del campo en `field` y `subfield`
   
-    if (subfield) {
+    if (field === 'address_attributes' && subfield) {
       // Si hay un subcampo, actualiza el objeto `address`
       setFormData((prevState) => ({
         ...prevState,
-        address: {
+        address_attributes: {
           ...prevState.address_attributes,
           [subfield]: value,
         },
@@ -64,11 +72,24 @@ const RegistrationForm = () => {
     .then(response => response.json())
     .then(data => {
       // Maneja la respuesta del servidor
+       if (data.errors) {
+          // Mostrar los errores recibidos del servidor
+          setErrors(data.errors);
+          setSuccessMessage('');
+        } else {
+          // Manejar el éxito del registro
+          console.log('Usuario registrado con éxito:', data);
+          setSuccessMessage('Usuario registrado con éxito. Redirigiendo...');
+          setErrors([]); // Limpiar errores si el registro es exitoso
+          setTimeout(() => navigate('/home'), 2000);
+        }
       console.log('Respuesta del servidor:', data);
     })
     .catch(error => {
       // Maneja los errores
       console.error('Error:', error);
+      setErrors(['Ocurrió un error al intentar registrar el usuario.']);
+      setSuccessMessage('');
     });
   };
 
@@ -92,6 +113,18 @@ const RegistrationForm = () => {
               </Grid>
             </Grid>
           </form>
+          {successMessage && (
+            <Typography variant="h6" color="success" align="center" style={{ marginTop: '20px' }}>
+              {successMessage}
+            </Typography>
+          )}
+          {errors.length > 0 && (
+            <Typography variant="h6" color="error" align="center" style={{ marginTop: '20px' }}>
+              {errors.map((error, index) => (
+                <div key={index}>{error}</div>
+              ))}
+            </Typography>
+          )}
         </Paper>
       </Grid>
     </Grid>

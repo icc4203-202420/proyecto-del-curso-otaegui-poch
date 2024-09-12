@@ -8,7 +8,7 @@ const AddressDetails = ({ handleChange, formData }) => {
         <TextField
           fullWidth
           label="Calle Principal"
-          name="address_attributes.line1"  
+          name="address_attributes.line1"
           variant="outlined"
           margin="normal"
           value={formData.address_attributes.line1 || ''}
@@ -18,8 +18,8 @@ const AddressDetails = ({ handleChange, formData }) => {
       <Grid item xs={12}>
         <TextField
           fullWidth
-          label="Segunda Línea de Dirección"  
-          name="address_attributes.line2"  
+          label="Segunda Línea de Dirección"
+          name="address_attributes.line2"
           variant="outlined"
           margin="normal"
           value={formData.address_attributes.line2 || ''}
@@ -41,7 +41,7 @@ const AddressDetails = ({ handleChange, formData }) => {
         <TextField
           fullWidth
           label="País"
-          name="address_attributes.country_id"  
+          name="address_attributes.country_id"
           variant="outlined"
           margin="normal"
           value={formData.address_attributes.country_id || ''}

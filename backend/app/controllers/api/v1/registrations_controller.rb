@@ -2,6 +2,16 @@ class API::V1::RegistrationsController < Devise::RegistrationsController
   include ::RackSessionsFix
   respond_to :json
 
+  def create
+    user = User.new(sign_up_params)
+    if user.save
+      render json:  { message: "Usuario registrado exitosamente", user: user }, status: :created
+    else
+      puts user.errors.full_messages
+      render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def sign_up_params

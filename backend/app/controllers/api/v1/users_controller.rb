@@ -79,4 +79,13 @@ class API::V1::UsersController < ApplicationController
   def friendship_params
     params.require(:friendship).permit(:friend_id, :bar_id)
   end
+
+  def authenticate_user!
+    token = request.headers['Authorization']
+    decoded_token = JsonWebToken.decode(token)
+
+    @current_user = User.find(decoded_token[:user_id]) if decoded_token
+    render json: { errors: ['Not Authenticated'] }, status: :unauthorized unless @current_user
+  end
+end
 end
