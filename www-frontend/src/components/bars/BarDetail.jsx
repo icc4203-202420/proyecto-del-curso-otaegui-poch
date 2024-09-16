@@ -21,7 +21,7 @@ const BarDetail = () => {
   const { id } = useParams();
   const [bar, setBar] = useState(null);
   const [beers, setBeers] = useState([]);
-  const [showBeers, setShowBeers] = useState(false); // Estado para mostrar/ocultar cervezas
+  const [showBeers, setShowBeers] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -38,6 +38,17 @@ const BarDetail = () => {
 
     fetchBarDetail();
   }, [id]);
+
+  // Función para manejar el check-in
+  const handleCheckIn = async (eventId) => {
+    try {
+      await axios.post(`http://localhost:3001/api/v1/events/${eventId}/check_in`);
+      alert('Check-in realizado con éxito');
+    } catch (error) {
+      console.error('Error al hacer check-in:', error);
+      setError('Error al realizar el check-in');
+    }
+  };
 
   if (error) return <Typography variant="h6" color="error">{error}</Typography>;
   if (!bar) return <Typography variant="h6">Loading...</Typography>;
@@ -63,6 +74,7 @@ const BarDetail = () => {
             <TableRow>
               <TableCell><strong>Nombre del Evento</strong></TableCell>
               <TableCell><strong>Fecha</strong></TableCell>
+              <TableCell><strong>Acciones</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -71,11 +83,20 @@ const BarDetail = () => {
                 <TableRow key={event.id}>
                   <TableCell>{event.name}</TableCell>
                   <TableCell>{formatDate(event.date) || 'Fecha no disponible'}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleCheckIn(event.id)}
+                    >
+                      Check In
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={2} align="center">No hay eventos programados</TableCell>
+                <TableCell colSpan={3} align="center">No hay eventos programados</TableCell>
               </TableRow>
             )}
           </TableBody>

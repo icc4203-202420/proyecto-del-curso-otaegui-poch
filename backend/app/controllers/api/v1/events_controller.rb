@@ -7,6 +7,10 @@ module API
       before_action :set_event, only: %i[show update destroy]
       before_action :authenticate_user!, only: %i[create update destroy]
 
+      #### probando
+
+
+  skip_before_action :verify_jwt_token, only: [:check_in]
       # GET /api/v1/events
       def index
         bar = Bar.find(params[:bar_id])
@@ -34,7 +38,16 @@ module API
         end
       end
       
-      
+      def check_in
+        event = Event.find(params[:id])
+        attendance = Attendance.find_or_initialize_by(user: current_user, event: event)
+    
+        if attendance.update(checked_in: true)
+          render json: { message: 'Checked in successfully' }, status: :ok
+        else
+          render json: { errors: attendance.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
 
       # PATCH/PUT /api/v1/events/:id
       def update
