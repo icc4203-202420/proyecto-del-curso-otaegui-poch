@@ -13,13 +13,18 @@ class API::V1::BarsController < ApplicationController
     render json: @bars.as_json(include: :address), status: :ok  end
 
   def show
+
     if @bar.image.attached?
-      render json: @bar.as_json.merge({ 
+      render json: @bar.as_json(include: { address: {only: [:id, :city, :line1, :line2]}, events: {} }).merge({ 
         image_url: url_for(@bar.image), 
-        thumbnail_url: url_for(@bar.thumbnail) }),
-        status: :ok
+        thumbnail_url: url_for(@bar.thumbnail),
+        beers: @bar.beers.as_json(only:[:id, :name, :beer_type]) 
+        }), status: :ok
     else
-      render json: { bar: @bar.as_json }, status: :ok
+      render json: { 
+        bar: @bar.as_json(include: { address: {only: [:id, :city, :line1, :line2]}, events: {} }),
+        beers: @bar.beers.as_json(only:[:id, :name, :beer_type]) 
+        }, status: :ok
     end
   end
 

@@ -6,6 +6,7 @@ import EventList from './components/EventList.jsx';
 import UserSearch from './components/UserSearch.jsx';
 import RegistrationForm from './components/registration/RegistrationForm.jsx';
 import LoginForm from './components/login/LoginForm.jsx';
+import BarDetail from './components/bars/BarDetail.jsx';
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/Home" element={<Home />} />
         <Route path="/beers" element={<BeerList />} />
         <Route path="/bars" element={<BarList />} />
+        <Route path="/bars/:id" element={<BarDetail/>}/>
         <Route path="/events" element={<EventList />} />
         <Route path="/search" element={<UserSearch />} />
       </Routes>
