@@ -73,6 +73,11 @@ function Home() {
               Search Users
             </StyledButton>
           </Grid>
+          <Grid item>
+            <StyledButton component={Link} to="/map" variant="contained" color="warning">
+              Map
+            </StyledButton>
+          </Grid>
         </Grid>
       </HeroSection>
     </Container>
