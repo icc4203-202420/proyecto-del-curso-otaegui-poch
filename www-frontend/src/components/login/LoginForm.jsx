@@ -17,29 +17,39 @@ const LoginForm = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    fetch('http://localhost:3000/api/v1/login', {
+    fetch('http://localhost:3001/api/v1/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
+      })
+      .then((response) => response.json()) // Procesa siempre la respuesta JSON
       .then((data) => {
-        if (data.success) {
+        // Extrae el código de estado del objeto devuelto por el servidor
+      const statusCode = data.status?.code || 0;
+      const success = statusCode === 200; // Verifica que el código sea 200
+      const message = data.status?.message || 'Inicio de sesión exitoso';
+      const token = data.status?.data?.token; // Extrae el token si está disponible
+      console.log(token)
+
+        if (success) {
+          if (token) {
+            localStorage.setItem('authToken', token); // Almacena el token
+          }
           setOpenSuccess(true); // Mostrar snackbar de éxito
           setTimeout(() => {
             navigate('/home'); // Redirigir después de un tiempo
           }, 2000); // Espera 2 segundos antes de redirigir
         } else {
           setOpenError(true); // Mostrar snackbar de error
-          setErrorMessage(data.message || 'Error en el inicio de sesión');
+          setErrorMessage(message || 'Error en el inicio de sesión');
         }
       })
       .catch((error) => {
         console.error('Error:', error);
         setOpenError(true);
-        setErrorMessage('Ocurrió un error durante el inicio de sesión');
+        setErrorMessage(error.message || 'Ocurrió un error durante el inicio de sesión');;
       });
   };
 

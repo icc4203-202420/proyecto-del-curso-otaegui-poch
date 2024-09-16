@@ -6,10 +6,11 @@ class API::V1::BarsController < ApplicationController
   before_action :set_bar, only: [:show, :update, :destroy]
   before_action :verify_jwt_token, only: [:create, :update, :destroy]
 
+
+  
   def index
-    @bars = Bar.all
-    render json: { bars: @bars }, status: :ok
-  end
+    @bars = Bar.includes(:address).all
+    render json: @bars.as_json(include: :address), status: :ok  end
 
   def show
     if @bar.image.attached?

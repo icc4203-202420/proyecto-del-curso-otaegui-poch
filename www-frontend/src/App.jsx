@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './components/Home.jsx';
-import BeerList from './components/BeerList.jsx';
-import BarList from './components/BarList.jsx';
+import BeerList from './components/beers/BeerList.jsx';
+import BarList from './components/bars/BarList.jsx';
 import EventList from './components/EventList.jsx';
 import UserSearch from './components/UserSearch.jsx';
 import RegistrationForm from './components/registration/RegistrationForm.jsx';

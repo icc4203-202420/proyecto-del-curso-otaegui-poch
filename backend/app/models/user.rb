@@ -30,6 +30,6 @@ class User < ApplicationRecord
   has_many :inverse_friends, through: :inverse_friendships, source: :user  
 
   def generate_jwt
-    Warden::JWTAuth::UserEncoder.new.call(self, :user, nil)[0]
-  end
+    JWT.encode({ id: self.id, exp: 60.days.from_now.to_i }, Rails.application.credentials.devise_jwt_secret_key, 'HS256')
+  end  
 end
