@@ -20,13 +20,17 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :events, only: [:show, :create, :update, :destroy]
-    end
-  end
-  
-  namespace :api, defaults: { format: :json } do
-    namespace :v1 do
-      resources :bars, only: [:index, :show, :create, :update, :destroy]
+      resources :bars, only: [:index, :show, :create, :update, :destroy] do
+        # Uncomment this line if you want events nested under bars
+        # resources :events, only: [:index]
+      end
+
+      resources :events, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          post 'check_in'
+        end
+      end
+
       resources :beers
       resources :users, only: [:show, :create, :update] do
         member do
@@ -35,10 +39,8 @@ Rails.application.routes.draw do
         end
         resources :reviews, only: [:index]
       end
-      
-      resources :reviews, only: [:index, :show, :create, :update, :destroy]
 
-      resources :events, only: [:index, :show, :create, :update, :destroy]
+      resources :reviews, only: [:index, :show, :create, :update, :destroy]
     end
   end
 end
