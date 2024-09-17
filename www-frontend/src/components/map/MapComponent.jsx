@@ -1,35 +1,61 @@
-import { Loader } from '@googlemaps/js-api-loader';
-import { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
 
-const MapComponent = () => {
-  const mapRef = useRef(null);
+const libraries = ['places'];
+
+const MapComponent = ({ bars, searchQuery }) => {
+  const [center, setCenter] = useState({ lat: -33.4489, lng: -70.6693 }); // Coordenadas de Santiago por defecto
+  const [markers, setMarkers] = useState([]);
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
+    libraries,
+  });
 
   useEffect(() => {
-    const loader = new Loader({
-      apiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY, // Asegúrate de definir esta variable en tu archivo .env
-      version: 'weekly',
-    });
-    
-    loader.importLibrary('maps').then((lib) => {
-      const { Map } = lib;
-      const map = new Map(mapRef.current, {
-        center: { lat: -34.397, lng: 150.644 }, // Cambia las coordenadas por las de tu área de interés
-        zoom: 8,
-      });
-      return map;
-    })
-    .then((map) => {
-      loader.importLibrary('marker').then((lib) => {
-        const { AdvancedMarkerElement } = lib;
-        new AdvancedMarkerElement({
-          position: { lat: -34.397, lng: 150.644 },
-          map,
-        });
-      });
-    });
+    // Detectar ubicación actual del usuario
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCenter({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.error("Error al obtener la ubicación del usuario:", error);
+        }
+      );
+    }
   }, []);
 
-  return <div ref={mapRef} style={{ width: '100vw', height: '100vh' }} />;
+  useEffect(() => {
+    // Filtrar los bares según el término de búsqueda
+    if (searchQuery) {
+      const filteredBars = bars.filter(bar => bar.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      setMarkers(filteredBars);
+    } else {
+      setMarkers([]);
+    }
+  }, [searchQuery, bars]);
+
+  if (loadError) return <div>Error al cargar Google Maps</div>;
+
+  if (!isLoaded) return <div>Loading...</div>;
+
+  return (
+    <GoogleMap
+      mapContainerStyle={{ width: '100%', height: '100vh' }}
+      center={center}
+      zoom={13}
+    >
+      {markers.map((bar) => (
+        <Marker
+          key={bar.id}
+          position={{ lat: bar.latitude, lng: bar.longitude }}
+          label={bar.name}
+          title={bar.name} // Opcional: Muestra el nombre del bar como un título emergente
+        />
+      ))}
+    </GoogleMap>
+  );
 };
 
 export default MapComponent;
