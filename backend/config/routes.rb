@@ -28,6 +28,7 @@ Rails.application.routes.draw do
       resources :events, only: [:index, :show, :create, :update, :destroy] do
         member do
           post 'check_in'
+          post :upload_picture
         end
       end
 

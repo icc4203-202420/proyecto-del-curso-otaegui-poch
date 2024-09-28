@@ -5,17 +5,17 @@ module API
       include Authenticable
 
       before_action :set_event, only: %i[show update destroy]
-      before_action :authenticate_user!, only: %i[create update destroy]
+      before_action :verify_jwt_token, only: %i[create update destroy]
 
       #### probando
 
 
   skip_before_action :verify_jwt_token, only: [:check_in]
       # GET /api/v1/events
-      def index
-        bar = Bar.find(params[:bar_id])
-        events = bar.events
-        render json: events, status: :ok
+       # GET /api/v1/events
+       def index
+        events = Event.order(:date)
+        render json: events
       end
 
       # GET /api/v1/events/:id
@@ -63,6 +63,25 @@ module API
         @event.destroy
         head :no_content
       end
+
+
+# POST /api/v1/events/:id/upload_picture
+def upload_picture
+  image_data = params[:image]
+  decoded_image = decode_image(image_data)
+
+  if decoded_image
+    event_picture = @event.event_pictures.new(user: current_user, **decoded_image)
+
+    if event_picture.save
+      render json: event_picture, status: :created
+    else
+      render json: event_picture.errors, status: :unprocessable_entity
+    end
+  else
+    render json: { error: 'Invalid image data' }, status: :unprocessable_entity
+  end
+end
 
       private
 

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import Home from './components/Home.jsx';
 import BeerList from './components/beers/BeerList.jsx';
 import BarList from './components/bars/BarList.jsx';
-import EventList from './components/EventList.jsx';
+import EventList from './components/events/EventList.jsx';
 import UserSearch from './components/UserSearch.jsx';
 import RegistrationForm from './components/registration/RegistrationForm.jsx';
 import LoginForm from './components/login/LoginForm.jsx';
