@@ -33,7 +33,7 @@ Rails.application.routes.draw do
       end
 
       resources :beers
-      resources :users, only: [:show, :create, :update] do
+      resources :users, only: [:index,:show, :create, :update] do
         member do
           get 'friendships'
           post 'friendships', to: 'users#create_friendship'

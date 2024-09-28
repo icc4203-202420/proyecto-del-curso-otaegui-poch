@@ -51,4 +51,21 @@ if Rails.env.development?
     end
   end
 
+
+  users = FactoryBot.create_list(:user, 10) do |user|
+    user.address.update(country: countries.sample)
+  end
+
+  # Si quieres ver un ejemplo detallado de cómo se generan usuarios, aquí te dejo algo simple:
+  10.times do |i|
+    User.create!(
+      first_name: "User#{i + 1}",
+      last_name: "Lastname#{i + 1}",
+      email: "user#{i + 1}@example.com",
+      password: "password123",
+      age: rand(18..65),
+      handle: "user_handle_#{i + 1}"
+    )
+  end
+
 end

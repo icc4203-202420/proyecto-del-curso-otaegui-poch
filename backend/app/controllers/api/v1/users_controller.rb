@@ -1,10 +1,11 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
   before_action :set_user, only: [:show, :update, :friendships, :create_friendship]
-  before_action :authenticate_user!, only: [:update, :create_friendship]
+  before_action :verify_jwt_token, only: [:update, :create_friendship]
 
   def index
-    @users = User.includes(:reviews, :address).all   
+    @users = User.all
+    render json: @users
   end
 
   def show
@@ -87,5 +88,4 @@ class API::V1::UsersController < ApplicationController
     @current_user = User.find(decoded_token[:user_id]) if decoded_token
     render json: { errors: ['Not Authenticated'] }, status: :unauthorized unless @current_user
   end
-end
 end

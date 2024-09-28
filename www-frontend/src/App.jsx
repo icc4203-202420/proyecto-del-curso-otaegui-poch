@@ -10,6 +10,7 @@ import LoginForm from './components/login/LoginForm.jsx';
 import BarDetail from './components/bars/BarDetail.jsx';
 import BottomNavbar from './components/navbar/BottomNavbar';  // Asegúrate de la ruta correcta
 import MapComponent from './components/map/MapComponent';
+import UserList from './components/user/UserList.jsx';
 
 
 
@@ -29,7 +30,7 @@ function AppContent() {
         <Route path="/bars" element={<BarList />} />
         <Route path="/bars/:id" element={<BarDetail/>}/>
         <Route path="/events" element={<EventList />} />
-        <Route path="/search" element={<UserSearch />} />
+        <Route path="/search" element={<UserList />} />
         <Route path="/map" element={<MapComponent />} />
       </Routes>
       {!hideNavbar && <BottomNavbar />}
