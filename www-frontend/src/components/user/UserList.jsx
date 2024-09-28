@@ -1,64 +1,80 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Container, Typography } from '@material-ui/core';
+import UserCard from './UserCard'; // Asegúrate de que la ruta sea correcta
+import UserDetail from './UserDetail'; // Asegúrate de que la ruta sea correcta
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');  // Estado para almacenar el término de búsqueda
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Obtener los usuarios del backend
   useEffect(() => {
-    fetch('/api/v1/users')
-      .then(response => response.json())
-      .then(data => {
-        setUsers(data);
-        setLoading(false);
-      })
-      .catch(error => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('/api/v1/users');
+        setUsers(response.data);
+      } catch (error) {
         console.error('Error fetching users:', error);
+        alert('Error fetching users, check console for details.'); // Muestra un alert si hay error
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchUsers();
   }, []);
 
-  // Filtrar los usuarios según el término de búsqueda por `handle`
   const filteredUsers = users.filter(user =>
     user.handle.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleViewUser = (userId) => {
+    const user = users.find(user => user.id === userId);
+    setSelectedUser(user);
+  };
 
   if (loading) {
     return <p>Loading...</p>;
   }
 
   return (
-    <div>
-      {/* Campo de búsqueda */}
-      <input
-        type="text"
-        placeholder="Search by handle"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{
-          marginBottom: '10px',
-          padding: '8px',
-          width: '100%',
-          fontSize: '16px',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-        }}
-      />
-      
-      {/* Mostrar mensaje si no hay usuarios */}
-      {filteredUsers.length === 0 ? (
-        <p>No users found.</p>
+    <Container>
+      {selectedUser ? (
+        <UserDetail user={selectedUser} />
       ) : (
-        <ul>
-          {filteredUsers.map(user => (
-            <li key={user.id}>
-              {user.handle} - {user.first_name} {user.last_name}
-            </li>
-          ))}
-        </ul>
+        <>
+          <Typography variant="h4" gutterBottom>
+            User List
+          </Typography>
+
+          <input
+            type="text"
+            placeholder="Search by handle"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              marginBottom: '20px',
+              padding: '8px',
+              width: '100%',
+              fontSize: '16px',
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+            }}
+          />
+
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map(user => (
+              <UserCard key={user.id} user={user} handleViewUser={handleViewUser} />
+            ))
+          ) : (
+            <Typography variant="body1">No users found.</Typography>
+          )}
+        </>
       )}
-    </div>
+    </Container>
   );
 };
 
