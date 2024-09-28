@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import EventCard from './EventCard';
+import EventDetail from './EventDetail';
 import { Container, Typography } from '@material-ui/core';
 
 const EventList = ({ handleCheckIn }) => {
   const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -20,17 +22,28 @@ const EventList = ({ handleCheckIn }) => {
     fetchEvents();
   }, []);
 
+  const handleViewEvent = (eventId) => {
+    const event = events.find(event => event.id === eventId);
+    setSelectedEvent(event);
+  };
+
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
-        Próximos Eventos..
-      </Typography>
-      {events.length > 0 ? (
-        events.map(event => (
-          <EventCard key={event.id} event={event} handleCheckIn={handleCheckIn} />
-        ))
+      {selectedEvent ? (
+        <EventDetail event={selectedEvent} />
       ) : (
-        <Typography variant="body1">No hay eventos próximos.</Typography>
+        <>
+          <Typography variant="h4" gutterBottom>
+            Próximos Eventos
+          </Typography>
+          {events.length > 0 ? (
+            events.map(event => (
+              <EventCard key={event.id} event={event} handleViewEvent={handleViewEvent} />
+            ))
+          ) : (
+            <Typography variant="body1">No hay eventos próximos.</Typography>
+          )}
+        </>
       )}
     </Container>
   );
