@@ -69,12 +69,10 @@ class API::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.fetch(:user, {}).
-        permit(:id, :first_name, :last_name, :email, :age, :handle,
-            { address_attributes: [:id, :line1, :line2, :city, :country, :country_id, 
-              country_attributes: [:id, :name]],
-              reviews_attributes: [:id, :text, :rating, :beer_id, :_destroy]
-            })
+    params.require(:user).permit(
+      :first_name, :last_name, :email, :handle,
+      :password, :password_confirmation
+    )
   end
 
   def friendship_params
