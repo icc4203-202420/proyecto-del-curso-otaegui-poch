@@ -1,6 +1,24 @@
 class API::V1::SessionsController < Devise::SessionsController
   include ::RackSessionsFix
   respond_to :json
+  skip_before_action :authenticate_user!, only: [:create]
+
+  def create
+    puts "Intentando iniciar sesión con email: #{params[:email]}"
+
+    user = User.find_for_database_authentication(email: params[:email])
+    
+    if user&.valid_password?(params[:password])
+      sign_in(user)
+      respond_with(user)
+    else
+      render json: {
+        status: 401,
+        message: 'Invalid email or password.'
+      }, status: :unauthorized
+    end
+  end
+  
   private
   
   def respond_with(current_user, _opts = {})
@@ -16,7 +34,6 @@ class API::V1::SessionsController < Devise::SessionsController
       }
     }, status: :ok
   end
-
 
   def respond_to_on_destroy
     if request.headers['Authorization'].present?

@@ -1,4 +1,6 @@
 class API::V1::UsersController < ApplicationController
+  before_action :authenticate_user!
+
   respond_to :json
   before_action :set_user, only: [:show, :update, :friendships, :create_friendship]
   before_action :verify_jwt_token, only: [:update]
@@ -17,7 +19,7 @@ class API::V1::UsersController < ApplicationController
     if @user.save
       render json: @user.id, status: :ok
     else
-      render json: @user.errors, status: :unprocessable_entity
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
   end
   
@@ -62,6 +64,20 @@ class API::V1::UsersController < ApplicationController
     end
   end
 
+  def authenticate_user!
+    token = request.headers['Authorization']
+    if token.present?
+      begin
+        decoded_token = JsonWebToken.decode(token.split(' ').last)
+        @current_user = User.find(decoded_token[:user_id])
+      rescue JWT::DecodeError
+        render json: { errors: 'Token no válido' }, status: :unauthorized
+      end
+    else
+      render json: { errors: 'Token no proporcionado' }, status: :unauthorized
+    end
+  end
+
   private
 
   def set_user
@@ -71,7 +87,8 @@ class API::V1::UsersController < ApplicationController
   def user_params
     params.require(:user).permit(
       :first_name, :last_name, :email, :handle,
-      :password, :password_confirmation
+      :password, :password_confirmation,
+      address_attributes: [:line1, :line2, :city, :country_id]
     )
   end
 

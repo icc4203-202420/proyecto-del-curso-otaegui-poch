@@ -1,6 +1,7 @@
 class API::V1::RegistrationsController < Devise::RegistrationsController
   include ::RackSessionsFix
   respond_to :json
+  skip_before_action :authenticate_user!, only: [:create]
 
   def create
     user = User.new(sign_up_params)
@@ -11,6 +12,16 @@ class API::V1::RegistrationsController < Devise::RegistrationsController
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
+  def destroy
+    # Eliminar la sesión del usuario actual
+    sign_out(current_user)
+    render json: {
+      status: 200,
+      message: 'Logged out successfully.'
+    }, status: :ok
+  end
+
 
   private
 
