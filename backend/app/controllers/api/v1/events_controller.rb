@@ -5,7 +5,7 @@ module API
       include Authenticable
 
       before_action :set_event, only: %i[show update destroy]
-      before_action :verify_jwt_token, only: %i[create update destroy]
+      before_action :verify_jwt_token, only: %i[create update destroy upload_picture]
 
       #### probando
 
@@ -67,24 +67,45 @@ module API
 
 # POST /api/v1/events/:id/upload_picture
 def upload_picture
-  image_data = params[:image]
-  decoded_image = decode_image(image_data)
+  @event = Event.find(params[:id])
+  if current_user.nil?
+    render json: { error: 'Usuario no autenticado' }, status: :unauthorized
+    return
+  end
 
-  if decoded_image
-    event_picture = @event.event_pictures.new(user: current_user, **decoded_image)
+  if @event.present?
+    picture = @event.event_pictures.new(user_id: current_user.id, description: params[:description])
+    picture.image.attach(params[:image])
 
-    if event_picture.save
-      render json: event_picture, status: :created
+    if picture.save
+      render json: { success: 'Imagen subida con éxito' }, status: :ok
     else
-      render json: event_picture.errors, status: :unprocessable_entity
+      render json: { error: 'Error al guardar la imagen' }, status: :unprocessable_entity
     end
   else
-    render json: { error: 'Invalid image data' }, status: :unprocessable_entity
+    render json: { error: 'Evento no encontrado' }, status: :not_found
   end
 end
 
-      private
 
+def pictures
+  @event_pictures = EventPicture.where(event_id: params[:id])
+  pictures_with_url = @event_pictures.map do |pic|
+    {
+      id: pic.id,
+      description: pic.description,
+      pictures_url: pic.pictures_url.map { |url| "#{request.base_url}/#{url}" } # Generar URLs absolutas
+    }
+  end
+  render json: pictures_with_url
+end
+
+
+      private
+      def current_user
+        # Define aquí cómo obtener el usuario actual, por ejemplo, desde el token JWT
+        @current_user ||= User.find_by(id: session[:user_id])
+      end
       # Método para encontrar el evento por ID
       def set_event
         @event = Event.find(params[:id])

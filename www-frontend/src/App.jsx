@@ -12,7 +12,9 @@ import BottomNavbar from './components/navbar/BottomNavbar';  // Asegúrate de l
 import MapComponent from './components/map/MapComponent';
 import UserList from './components/user/UserList.jsx';
 
+import EventDetail from './components/events/EventDetail';
 
+import EventPictures from './components/events/EventPictures.jsx';
 
 function AppContent() {
   // Hook para obtener la ruta actual
@@ -28,16 +30,17 @@ function AppContent() {
         <Route path="/Home" element={<Home />} />
         <Route path="/beers" element={<BeerList />} />
         <Route path="/bars" element={<BarList />} />
-        <Route path="/bars/:id" element={<BarDetail/>}/>
+        <Route path="/bars/:id" element={<BarDetail />} />
         <Route path="/events" element={<EventList />} />
         <Route path="/search" element={<UserList />} />
         <Route path="/map" element={<MapComponent />} />
+        <Route path="/event/:id" element={<EventDetail />} />
+        <Route path="/event/:id/gallery" element={<EventPictures />} />
       </Routes>
       {!hideNavbar && <BottomNavbar />}
     </div>
   );
-};
-
+}
 
 function App() {
   return (

@@ -20,15 +20,18 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      post 'login', to: 'sessions#create'
       resources :bars, only: [:index, :show, :create, :update, :destroy] do
         # Uncomment this line if you want events nested under bars
         # resources :events, only: [:index]
       end
 
-      resources :events, only: [:index, :show, :create, :update, :destroy] do
+      resources :events, only: [:index, :show, :create, :update, :destroy, :upload_picture, :pictures] do
         member do
           post 'check_in'
-          post :upload_picture
+          post 'upload_picture'
+          get 'pictures'
+          
         end
       end
 

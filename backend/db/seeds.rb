@@ -68,4 +68,37 @@ if Rails.env.development?
     )
   end
 
+
+  require 'faker'
+
+  # Ruta a la carpeta de imágenes
+  images_path = Rails.root.join('db', 'seeds', 'images')
+  
+  if Dir.exist?(images_path)
+    image_files = Dir.children(images_path)
+  
+    # Itera sobre los eventos y les asigna imágenes desde la carpeta 'seeds/images'
+    Event.all.each do |event|
+      num_images = rand(1..3)
+      selected_images = image_files.sample(num_images)
+    
+      if selected_images.any?
+        EventPicture.create!(
+          event: event,
+          user: User.all.sample,
+          description: Faker::Lorem.sentence(word_count: 10),
+          created_at: Time.now,
+          updated_at: Time.now,
+          pictures_url: selected_images.map { |image_file| File.join('seeds/images', image_file) }
+        )
+      else
+        puts "No se encontraron archivos de imagen en la carpeta seeds/images para el evento #{event.id}."
+      end
+    end
+  else
+    puts "Carpeta de imágenes no encontrada, no se pueden asignar imágenes a los eventos."
+  end
+  
+
+
 end

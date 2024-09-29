@@ -45,7 +45,7 @@ class API::V1::UsersController < ApplicationController
   def create_friendship
     friend = User.find_by(id: friendship_params[:friend_id])
     if friend
-      friendship = @user.friendships.build(friend_id: friend.id, bar_id: friendship_params[:bar_id])
+      friendship = current_user.friendships.build(friend_id: friend.id, bar_id: friendship_params[:bar_id])
       if friendship.save
         render json: { message: 'Friendship created successfully' }, status: :created
       else
