@@ -16,7 +16,12 @@ const EventDetail = ({ event }) => {
     const formData = new FormData();
     formData.append('image', image);
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken'); // Asegúrate de que el token se almacena en localStorage
+
+    if (!token) {
+      alert('Token no encontrado. Por favor, inicia sesión de nuevo.');
+      return;
+    }
 
     try {
       await axios.post(`http://localhost:3001/api/v1/events/${event.id}/upload_picture`, formData, {
@@ -34,7 +39,7 @@ const EventDetail = ({ event }) => {
 
   const handleViewPictures = async () => {
     try {
-      const response = await axios.get(`/api/v1/events/${event.id}/pictures`);
+      const response = await axios.get(`http://localhost:3001/api/v1/events/${event.id}/pictures`);
       setPictures(response.data);
       setShowPictures(true);
     } catch (error) {
@@ -65,27 +70,26 @@ const EventDetail = ({ event }) => {
 
       {showPictures && (
         <Grid container spacing={2} style={{ marginTop: '20px' }}>
-          {pictures.map((pic, index) => (
-            // pic.pictures_url es un array, así que mapeamos sobre él
-            pic.pictures_url.map((url, idx) => (
-              <Grid item xs={12} sm={6} md={4} key={idx}>
+          {pictures.flatMap((pic, picIndex) =>
+            pic.pictures_url.map((url, urlIndex) => (
+              <Grid item xs={12} sm={6} md={4} key={`${picIndex}-${urlIndex}`}>
                 <Card>
                   <CardMedia
                     component="img"
-                    alt={`Event Picture ${index + 1} - ${idx + 1}`}
+                    alt={`Foto ${urlIndex + 1} en el evento ${event.name}`}
                     height="140"
                     image={url}
-                    title={`Event Picture ${index + 1} - ${idx + 1}`}
+                    title={`Foto ${urlIndex + 1} en el evento ${event.name}`}
                   />
                   <CardContent>
                     <Typography variant="body2" color="textSecondary" component="p">
-                      {pic.description}
+                      {`Foto ${urlIndex + 1} en el evento ${event.name}`}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
             ))
-          ))}
+          )}
         </Grid>
       )}
     </Container>

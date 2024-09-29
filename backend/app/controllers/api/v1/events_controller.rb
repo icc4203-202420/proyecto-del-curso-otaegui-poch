@@ -10,7 +10,7 @@ module API
       #### probando
 
 
-      skip_before_action :verify_jwt_token, only: %i[index show check_in]
+      skip_before_action :verify_jwt_token, only: %i[index show check_in upload_picture]
       # GET /api/v1/events
        # GET /api/v1/events
        def index
@@ -67,23 +67,53 @@ module API
 
 # POST /api/v1/events/:id/upload_picture
 def upload_picture
-  @event = Event.find(params[:id])
-  if current_user.nil?
-    render json: { error: 'Usuario no autenticado' }, status: :unauthorized
+  @event = Event.find_by(id: params[:id])
+
+  if @event.nil?
+    render json: { error: 'Evento no encontrado' }, status: :not_found
     return
   end
 
-  if @event.present?
-    picture = @event.event_pictures.new(user_id: current_user.id, description: params[:description])
-    picture.image.attach(params[:image])
+  # cambiar por el id del usuario actual Importante
+  user_id = 1
 
-    if picture.save
-      render json: { success: 'Imagen subida con éxito' }, status: :ok
-    else
-      render json: { error: 'Error al guardar la imagen' }, status: :unprocessable_entity
-    end
+  # Verificar que el user_id esté presente
+  if user_id.blank?
+    render json: { error: 'ID de usuario no proporcionado' }, status: :bad_request
+    return
+  end
+
+  # Verificar si el usuario existe
+  user = User.find_by(id: user_id)
+  if user.nil?
+    render json: { error: 'Usuario no encontrado' }, status: :not_found
+    return
+  end
+
+  # Crear la carpeta si no existe
+  directory = Rails.root.join('public', 'seeds', 'images')
+  FileUtils.mkdir_p(directory) unless File.directory?(directory)
+
+  # Obtener el nombre original del archivo
+  original_filename = params[:image].original_filename
+  filepath = directory.join(original_filename)
+
+  # Guardar la imagen en el sistema de archivos
+  File.open(filepath, 'wb') do |file|
+    file.write(params[:image].read)
+  end
+
+  # Crear una nueva instancia de EventPicture
+  picture = @event.event_pictures.new(
+    user_id: user.id,
+    description: params[:description],
+    pictures_url: ["/seeds/images/#{original_filename}"]
+  )
+
+  if picture.save
+    render json: { success: 'Imagen subida con éxito', url: picture.pictures_url }, status: :ok
   else
-    render json: { error: 'Evento no encontrado' }, status: :not_found
+    render json: { error: 'Error al guardar la imagen', messages: picture.errors.full_messages }, status: :unprocessable_entity
   end
 end
 

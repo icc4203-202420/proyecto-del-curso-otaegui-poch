@@ -16,9 +16,7 @@ const EventCard = ({ event, handleViewEvent }) => {
         <Typography color="textSecondary">
           {formatDate(event.date) || 'Fecha no disponible'}
         </Typography>
-        <Typography variant="body2" component="p">
-          {event.description}
-        </Typography>
+        
         <Button
           variant="contained"
           color="primary"
