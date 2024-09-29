@@ -47,7 +47,7 @@ const UserList = () => {
       ) : (
         <>
           <Typography variant="h4" gutterBottom>
-            User List
+            Users
           </Typography>
 
           <input

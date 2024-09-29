@@ -1,7 +1,7 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
   before_action :set_user, only: [:show, :update, :friendships, :create_friendship]
-  before_action :verify_jwt_token, only: [:update, :create_friendship]
+  before_action :verify_jwt_token, only: [:update]
 
   def index
     @users = User.all

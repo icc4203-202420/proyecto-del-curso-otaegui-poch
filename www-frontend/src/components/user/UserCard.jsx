@@ -12,7 +12,7 @@ const UserCard = ({ user, handleViewUser }) => {
           Handle: {user.handle}
         </Typography>
         <Button variant="contained" color="primary" onClick={() => handleViewUser(user.id)}>
-          View Details
+          View
         </Button>
       </CardContent>
     </Card>
