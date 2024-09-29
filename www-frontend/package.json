@@ -38,6 +38,6 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
     "rollup": "^4.19.0",
-    "vite": "^5.4.5"
+    "vite": "^5.4.8"
   }
 }

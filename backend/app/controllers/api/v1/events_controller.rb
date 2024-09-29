@@ -10,7 +10,7 @@ module API
       #### probando
 
 
-  skip_before_action :verify_jwt_token, only: [:check_in]
+  skip_before_action :verify_jwt_token, only: [:check_in, :index]
       # GET /api/v1/events
        # GET /api/v1/events
        def index

@@ -11,7 +11,7 @@ const EventList = ({ handleCheckIn }) => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('/api/v1/events');
+        const response = await axios.get('http://localhost:3001/api/v1/events');
         const sortedEvents = response.data.sort((a, b) => new Date(a.date) - new Date(b.date));
         setEvents(sortedEvents);
       } catch (error) {

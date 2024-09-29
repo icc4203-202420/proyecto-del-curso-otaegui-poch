@@ -19,7 +19,7 @@ const EventDetail = ({ event }) => {
     const token = localStorage.getItem('token');
 
     try {
-      await axios.post(`/api/v1/events/${event.id}/upload_picture`, formData, {
+      await axios.post(`http://localhost:3001/api/v1/events/${event.id}/upload_picture`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`

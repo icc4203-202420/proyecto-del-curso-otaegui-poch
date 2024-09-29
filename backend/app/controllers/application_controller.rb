@@ -8,12 +8,32 @@ class ApplicationController < ActionController::API
     devise_parameter_sanitizer.permit(:account_update, keys: %i[name avatar])
   end
 
-  private
-
   def authenticate_user!
-    if current_user.nil?
-      render json: { error: 'You need to log in' }, status: :unauthorized
+    token = request.headers['Authorization']&.split(' ')&.last
+    decoded = decode_token(token)
+
+    if decoded && User.exists?(decoded[:user_id])
+      @current_user = User.find(decoded[:user_id])
+    else
+      render json: { error: 'No autorizado' }, status: :unauthorized
     end
   end
 
+  private
+
+  def encode_token(payload)
+    # Genera el token JWT
+    JWT.encode(payload, Rails.application.secrets.secret_key_base)
+  end
+
+  def decode_token(token)
+    # Decodifica el token JWT
+    return nil if token.nil?
+
+    begin
+      JWT.decode(token, Rails.application.secrets.secret_key_base)[0]
+    rescue JWT::DecodeError
+      nil
+    end
+  end
 end

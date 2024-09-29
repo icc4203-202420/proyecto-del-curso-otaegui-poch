@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Container, Typography, Button, Grid, Paper } from '@mui/material';
 import { styled } from '@mui/system';
+import LogoutButton from './logout/LogoutButton';
 
 // Estilo del contenedor principal
 const HeroSection = styled(Paper)(({ theme }) => ({
@@ -77,6 +78,9 @@ function Home() {
             <StyledButton component={Link} to="/map" variant="contained" color="warning">
               Map
             </StyledButton>
+          </Grid>
+          <Grid item>
+            <LogoutButton />
           </Grid>
         </Grid>
       </HeroSection>

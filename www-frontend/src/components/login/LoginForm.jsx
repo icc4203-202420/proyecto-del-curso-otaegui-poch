@@ -24,14 +24,19 @@ const LoginForm = () => {
       },
       body: JSON.stringify(formData),
       })
-      .then((response) => response.json()) // Procesa siempre la respuesta JSON
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error en la autenticación');
+        }
+        return response.json();
+      }) // Procesa siempre la respuesta JSON
       .then((data) => {
         // Extrae el código de estado del objeto devuelto por el servidor
-      const statusCode = data.status?.code || 0;
-      const success = statusCode === 200; // Verifica que el código sea 200
-      const message = data.status?.message || 'Inicio de sesión exitoso';
-      const token = data.status?.data?.token; // Extrae el token si está disponible
-      console.log(token)
+        const statusCode = data.status?.code || 0;
+        const success = statusCode === 200; // Verifica que el código sea 200
+        const message = data.status?.message || 'Inicio de sesión exitoso';
+        const token = data.status?.data?.token; // Extrae el token si está disponible
+        console.log(token)
 
         if (success) {
           if (token) {
@@ -44,6 +49,7 @@ const LoginForm = () => {
         } else {
           setOpenError(true); // Mostrar snackbar de error
           setErrorMessage(message || 'Error en el inicio de sesión');
+          throw new Error('No se recibió token de autenticación');
         }
       })
       .catch((error) => {

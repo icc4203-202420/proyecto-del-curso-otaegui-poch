@@ -1,5 +1,6 @@
 module Authenticable
   extend ActiveSupport::Concern
+  
 
   included do
     before_action :verify_jwt_token

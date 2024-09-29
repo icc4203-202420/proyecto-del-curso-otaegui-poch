@@ -8,14 +8,11 @@ class API::V1::SessionsController < Devise::SessionsController
 
     user = User.find_for_database_authentication(email: params[:email])
     
-    if user&.valid_password?(params[:password])
-      sign_in(user)
-      respond_with(user)
+    if user && user.authenticate(params[:password])
+      token = encode_token(user_id: user.id)
+      render json: { token: token }, status: :created
     else
-      render json: {
-        status: 401,
-        message: 'Invalid email or password.'
-      }, status: :unauthorized
+      render json: { error: 'Credenciales inválidas' }, status: :unauthorized
     end
   end
   
