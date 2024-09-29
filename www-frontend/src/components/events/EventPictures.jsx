@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 const EventPictures = () => {
   const { id } = useParams();
   const [pictures, setPictures] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPictures = async () => {
@@ -14,12 +15,22 @@ const EventPictures = () => {
         setPictures(response.data);
       } catch (error) {
         console.error('Error obteniendo las fotos:', error);
-        alert('Error obteniendo las fotos');
+        setError('Error obteniendo las fotos');
       }
     };
 
     fetchPictures();
   }, [id]);
+
+  if (error) {
+    return (
+      <Container>
+        <Typography variant="h4" gutterBottom>
+          {error}
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container>

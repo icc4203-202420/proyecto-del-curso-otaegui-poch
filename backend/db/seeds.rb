@@ -36,7 +36,10 @@ if Rails.env.development?
 
   # Crear eventos asociados a los bares
   events = bars.map do |bar|
-    FactoryBot.create(:event, bar: bar, name: "Event at #{bar.address.city}", date: 1.week.from_now)
+    # Generar una fecha aleatoria dentro de los próximos 3 meses
+    random_date = Time.current + rand(0..3.months).to_i
+  
+    FactoryBot.create(:event, bar: bar, name: "Event at #{bar.address.city}", date: random_date)
   end
 
   # Crear relaciones de amistad entre usuarios
@@ -70,34 +73,50 @@ if Rails.env.development?
 
 
   require 'faker'
-
+  require 'open-uri'
+  
   # Ruta a la carpeta de imágenes
-  images_path = Rails.root.join('db', 'seeds', 'images')
+  images_path = Rails.root.join('public', 'seeds', 'images')
   
-  if Dir.exist?(images_path)
-    image_files = Dir.children(images_path)
+  # Crea la carpeta si no existe
+  Dir.mkdir(images_path) unless Dir.exist?(images_path)
   
-    # Itera sobre los eventos y les asigna imágenes desde la carpeta 'seeds/images'
-    Event.all.each do |event|
-      num_images = rand(1..3)
-      selected_images = image_files.sample(num_images)
-    
-      if selected_images.any?
-        EventPicture.create!(
-          event: event,
-          user: User.all.sample,
-          description: Faker::Lorem.sentence(word_count: 10),
-          created_at: Time.now,
-          updated_at: Time.now,
-          pictures_url: selected_images.map { |image_file| File.join('seeds/images', image_file) }
-        )
-      else
-        puts "No se encontraron archivos de imagen en la carpeta seeds/images para el evento #{event.id}."
-      end
+  # Método para descargar y guardar una imagen desde una URL
+  def download_image(url, file_path)
+    File.open(file_path, 'wb') do |file|
+      file << URI.open(url).read
     end
-  else
-    puts "Carpeta de imágenes no encontrada, no se pueden asignar imágenes a los eventos."
   end
+  
+  # Itera sobre los eventos y les asigna imágenes generadas
+  Event.all.each do |event|
+    num_images = rand(12..20)
+  
+    pictures_urls = (1..num_images).map do |i|
+      image_file_name = "event_#{event.id}_image_#{i}.png"
+      image_file_path = File.join(images_path, image_file_name)
+  
+      # Generar la URL de la imagen aleatoria
+      image_url = "https://picsum.photos/200/300?random=#{rand(1..1000)}"
+  
+      # Descargar y guardar la imagen
+      download_image(image_url, image_file_path)
+  
+      # Retornar la ruta relativa para guardarla en la base de datos
+      File.join('seeds/images', image_file_name)
+    end
+  
+    # Crea el registro de EventPicture
+    EventPicture.create!(
+      event: event,
+      user: User.all.sample,
+      description: Faker::Lorem.sentence(word_count: 10),
+      created_at: Time.now,
+      updated_at: Time.now,
+      pictures_url: pictures_urls
+    )
+  end
+  
   
 
 

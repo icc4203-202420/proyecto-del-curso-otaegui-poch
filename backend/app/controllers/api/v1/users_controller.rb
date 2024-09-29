@@ -1,5 +1,5 @@
 class API::V1::UsersController < ApplicationController
-  before_action :authenticate_user!
+  #before_action :authenticate_user!
 
   respond_to :json
   before_action :set_user, only: [:show, :update, :friendships, :create_friendship]

@@ -10,7 +10,7 @@ module API
       #### probando
 
 
-  skip_before_action :verify_jwt_token, only: [:check_in]
+      skip_before_action :verify_jwt_token, only: %i[index show check_in]
       # GET /api/v1/events
        # GET /api/v1/events
        def index
@@ -99,7 +99,6 @@ def pictures
   end
   render json: pictures_with_url
 end
-
 
       private
       def current_user
