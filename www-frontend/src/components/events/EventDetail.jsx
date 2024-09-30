@@ -2,8 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { Container, Typography, Button, TextField, Grid, Card, CardMedia, CardContent, Modal, Backdrop, Fade } from '@material-ui/core';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios from 'axios';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+  modalContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: '8px',
+    padding: theme.spacing(4),
+    outline: 'none',
+    boxShadow: theme.shadows[5],
+  },
+  searchField: {
+    width: '100%', // Cambiado a 100% para ocupar todo el ancho
+    marginTop: theme.spacing(2),
+    [theme.breakpoints.up('sm')]: {
+      width: '300px', // Ancho fijo para pantallas más grandes
+    },
+  },
+  picture: {
+    maxWidth: '90%',
+    maxHeight: '70%',
+    borderRadius: '8px',
+    marginBottom: theme.spacing(2),
+  },
+  button: {
+    marginTop: theme.spacing(2),
+  },
+}));
 
 const EventDetail = ({ event }) => {
+  const classes = useStyles();
   const [image, setImage] = useState(null);
   const [pictures, setPictures] = useState([]);
   const [showPictures, setShowPictures] = useState(false);
@@ -14,7 +47,6 @@ const EventDetail = ({ event }) => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
-    // Fetch users for the autocomplete
     const fetchUsers = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/v1/users');
@@ -35,7 +67,7 @@ const EventDetail = ({ event }) => {
     const formData = new FormData();
     formData.append('image', imageToUpload);
 
-    const token = localStorage.getItem('authToken'); 
+    const token = localStorage.getItem('authToken');
 
     if (!token) {
       alert('Token no encontrado. Por favor, inicia sesión de nuevo.');
@@ -150,7 +182,7 @@ const EventDetail = ({ event }) => {
         onClick={handleCapture}
         style={{ marginTop: '10px', marginLeft: '10px' }}
       >
-        Tomar Foto y Subir
+        Take a Picture
       </Button>
 
       {showPictures && (
@@ -171,7 +203,7 @@ const EventDetail = ({ event }) => {
                       {`Foto ${urlIndex + 1} en el evento ${event.name}`}
                     </Typography>
                     <Button variant="contained" color="primary" onClick={() => handleOpenModal({ id: pic.id, url })}>
-                      Etiquetar
+                      TAG
                     </Button>
                   </CardContent>
                 </Card>
@@ -191,24 +223,30 @@ const EventDetail = ({ event }) => {
         }}
       >
         <Fade in={openModal}>
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <div className={classes.modalContent}>
             {selectedImage && (
               <>
-                <img src={selectedImage.url} alt="Foto ampliada" style={{ maxWidth: '90%', maxHeight: '70%' }} />
+                <img src={selectedImage.url} alt="Foto ampliada" className={classes.picture} />
                 <Autocomplete
                   options={users}
                   getOptionLabel={(option) => option.handle}
-                  style={{ width: 300, marginTop: '20px' }}
-                  renderInput={(params) => <TextField {...params} label="Buscar Usuario" variant="outlined" />}
+                  className={classes.searchField}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Buscar Usuario" variant="outlined" />
+                  )}
                   onChange={(event, newValue) => setSelectedUser(newValue)}
                   filterOptions={(options, { inputValue }) =>
                     options.filter(option =>
                       option.handle.toLowerCase().includes(inputValue.toLowerCase())
                     )
                   }
+                  size="small" // Ajustar el tamaño del campo de búsqueda
                 />
-                <Button variant="contained" color="primary" onClick={handleTagUser} style={{ marginTop: '20px' }}>
-                  Etiquetar Usuario
+                <Button variant="contained" color="primary" onClick={handleTagUser} className={classes.button}>
+                  Tag User
+                </Button>
+                <Button variant="contained" color="default" onClick={handleCloseModal} className={classes.button}>
+                  Go Back
                 </Button>
               </>
             )}
