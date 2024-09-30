@@ -1,5 +1,5 @@
 class API::V1::UsersController < ApplicationController
-  before_action :authenticate_user!, except: [:show, :index, :create]
+  before_action :authenticate_user!, except: [:show, :index, :create, :create_friendship]
 
   respond_to :json
   before_action :set_user, only: [:show, :update, :friendships, :create_friendship]
@@ -43,9 +43,12 @@ class API::V1::UsersController < ApplicationController
   # POST /api/v1/users/:id/friendships
 
   def create_friendship
+    user = User.find(1) # despues cambiar a current user
     friend = User.find_by(id: friendship_params[:friend_id])
+    
     if friend
-      friendship = current_user.friendships.build(friend_id: friend.id, bar_id: friendship_params[:bar_id])
+      friendship = user.friendships.build(friend_id: friend.id, bar_id: friendship_params[:bar_id])
+      
       if friendship.save
         render json: { message: 'Friendship created successfully' }, status: :created
       else
@@ -87,13 +90,13 @@ class API::V1::UsersController < ApplicationController
   def user_params
     params.require(:user).permit(
       :first_name, :last_name, :email, :handle,
-      :password, :password_confirmation,
-      address_attributes: [:line1, :line2, :city, :country_id]
+      :password, :password_confirmation
+      
     )
   end
 
   def friendship_params
-    params.require(:friendship).permit(:friend_id, :bar_id)
+    params.permit(:friend_id, :bar_id)
   end
 
   def authenticate_user!

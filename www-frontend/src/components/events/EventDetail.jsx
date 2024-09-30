@@ -171,7 +171,7 @@ const EventDetail = ({ event }) => {
                       {`Foto ${urlIndex + 1} en el evento ${event.name}`}
                     </Typography>
                     <Button variant="contained" color="primary" onClick={() => handleOpenModal({ id: pic.id, url })}>
-                      Ver en Grande
+                      Etiquetar
                     </Button>
                   </CardContent>
                 </Card>

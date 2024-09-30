@@ -1,18 +1,37 @@
 class API::V1::SessionsController < Devise::SessionsController
   include ::RackSessionsFix
   respond_to :json
-  skip_before_action :authenticate_user!, only: [:create]
+  # skip_before_action :authenticate_user!, only: [:create]
+
+  # def create
+  #   puts "Intentando iniciar sesión con email: #{params[:email]}"
+
+  #   user = User.find_for_database_authentication(email: params[:email])
+    
+  #   if user && user.authenticate(params[:password])
+  #     token = encode_token(user_id: user.id)
+  #     render json: { token: token }, status: :created
+  #   else
+  #     render json: { error: 'Credenciales inválidas' }, status: :unauthorized
+  #   end
+  # end
 
   def create
-    puts "Intentando iniciar sesión con email: #{params[:email]}"
-
     user = User.find_for_database_authentication(email: params[:email])
-    
-    if user && user.authenticate(params[:password])
-      token = encode_token(user_id: user.id)
-      render json: { token: token }, status: :created
+    if user&.valid_password?(params[:password])
+      token = user.generate_jwt # Asegúrate de tener este método en tu modelo User
+      render json: {
+        status: {
+          code: 200,
+          message: 'Logged in successfully.',
+          data: {
+            user: UserSerializer.new(user).serializable_hash[:data][:attributes],
+            token: token
+          }
+        }
+      }, status: :ok
     else
-      render json: { error: 'Credenciales inválidas' }, status: :unauthorized
+      render json: { error: 'Invalid credentials' }, status: :unauthorized
     end
   end
   

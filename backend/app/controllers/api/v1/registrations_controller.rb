@@ -1,7 +1,7 @@
 class API::V1::RegistrationsController < Devise::RegistrationsController
   include ::RackSessionsFix
   respond_to :json
-  skip_before_action :authenticate_user!, only: [:create]
+  #skip_before_action :authenticate_user!, only: [:create]
 
   def create
     user = User.new(sign_up_params)
