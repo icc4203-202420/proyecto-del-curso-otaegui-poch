@@ -1,11 +1,31 @@
-import React, { useState } from 'react';
-import { Container, Typography, Button, TextField, Grid, Card, CardMedia, CardContent } from '@material-ui/core';
+import React, { useState, useEffect } from 'react';
+import { Container, Typography, Button, TextField, Grid, Card, CardMedia, CardContent, Modal, Backdrop, Fade } from '@material-ui/core';
+import Autocomplete from '@mui/material/Autocomplete';
 import axios from 'axios';
 
 const EventDetail = ({ event }) => {
   const [image, setImage] = useState(null);
   const [pictures, setPictures] = useState([]);
   const [showPictures, setShowPictures] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [taggedUser, setTaggedUser] = useState('');
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  useEffect(() => {
+    // Fetch users for the autocomplete
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/v1/users');
+        setUsers(response.data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
@@ -15,7 +35,7 @@ const EventDetail = ({ event }) => {
     const formData = new FormData();
     formData.append('image', imageToUpload);
 
-    const token = localStorage.getItem('authToken'); // Asegúrate de que el token se almacena en localStorage
+    const token = localStorage.getItem('authToken'); 
 
     if (!token) {
       alert('Token no encontrado. Por favor, inicia sesión de nuevo.');
@@ -30,7 +50,7 @@ const EventDetail = ({ event }) => {
         }
       });
       alert('Imagen subida con éxito');
-      handleViewPictures(); // Actualizar la lista de fotos después de subir una nueva
+      handleViewPictures();
     } catch (error) {
       console.error('Error subiendo la imagen:', error);
       alert('Error subiendo la imagen');
@@ -72,6 +92,36 @@ const EventDetail = ({ event }) => {
     } catch (error) {
       console.error('Error obteniendo las fotos:', error);
       alert('Error obteniendo las fotos');
+    }
+  };
+
+  const handleOpenModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedImage(null);
+  };
+
+  const handleTagUser = async () => {
+    if (!selectedUser) {
+      alert('Por favor, selecciona un usuario a etiquetar.');
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:3001/api/v1/events/${event.id}/tag_user`, { picture_id: selectedImage.id, user_id: selectedUser.id }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      alert('Usuario etiquetado con éxito');
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Error etiquetando al usuario:', error);
+      alert('Error etiquetando al usuario');
     }
   };
 
@@ -120,6 +170,9 @@ const EventDetail = ({ event }) => {
                     <Typography variant="body2" color="textSecondary" component="p">
                       {`Foto ${urlIndex + 1} en el evento ${event.name}`}
                     </Typography>
+                    <Button variant="contained" color="primary" onClick={() => handleOpenModal({ id: pic.id, url })}>
+                      Ver en Grande
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
@@ -127,6 +180,41 @@ const EventDetail = ({ event }) => {
           )}
         </Grid>
       )}
+
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={openModal}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            {selectedImage && (
+              <>
+                <img src={selectedImage.url} alt="Foto ampliada" style={{ maxWidth: '90%', maxHeight: '70%' }} />
+                <Autocomplete
+                  options={users}
+                  getOptionLabel={(option) => option.handle}
+                  style={{ width: 300, marginTop: '20px' }}
+                  renderInput={(params) => <TextField {...params} label="Buscar Usuario" variant="outlined" />}
+                  onChange={(event, newValue) => setSelectedUser(newValue)}
+                  filterOptions={(options, { inputValue }) =>
+                    options.filter(option =>
+                      option.handle.toLowerCase().includes(inputValue.toLowerCase())
+                    )
+                  }
+                />
+                <Button variant="contained" color="primary" onClick={handleTagUser} style={{ marginTop: '20px' }}>
+                  Etiquetar Usuario
+                </Button>
+              </>
+            )}
+          </div>
+        </Fade>
+      </Modal>
     </Container>
   );
 };

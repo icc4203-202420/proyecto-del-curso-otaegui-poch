@@ -31,6 +31,7 @@ Rails.application.routes.draw do
           post 'check_in'
           post 'upload_picture'
           get 'pictures'
+          post 'tag_user'
           
         end
       end

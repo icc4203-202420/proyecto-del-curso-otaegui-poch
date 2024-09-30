@@ -130,6 +130,30 @@ def pictures
   render json: pictures_with_url
 end
 
+
+    # POST /api/v1/event_pictures/:id/tag_user
+def tag_user
+  @event_picture = EventPicture.find_by(id: params[:picture_id])
+
+  if @event_picture.nil?
+    return render json: { error: "Event picture not found" }, status: :not_found
+  end
+
+  user_id = params[:user_id]
+
+  # Inicializa el array de usuarios si es nulo
+  @event_picture.users_tagged ||= []
+
+  # Agrega el user_id al array de usuarios etiquetados
+  @event_picture.users_tagged << user_id
+
+  if @event_picture.save
+    render json: @event_picture, status: :ok
+  else
+    render json: @event_picture.errors, status: :unprocessable_entity
+  end
+end
+
       private
       def current_user
         # Define aquí cómo obtener el usuario actual, por ejemplo, desde el token JWT
