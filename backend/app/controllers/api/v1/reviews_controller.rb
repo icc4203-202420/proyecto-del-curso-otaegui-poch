@@ -16,6 +16,7 @@ class API::V1::ReviewsController < ApplicationController
     end
   end
 
+  
   def create
     @review = @user.reviews.build(review_params)
     if @review.save
@@ -46,7 +47,7 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def set_user
-    @user = User.find(params[:user_id]) 
+    @user = User.find(params[:review][:user_id]) # Buscar el user_id dentro del hash de review
   end
 
   def review_params
