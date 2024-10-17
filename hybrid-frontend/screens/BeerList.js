@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, FlatList, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import BeerCard from './BeerCard'; // Asegúrate de que este componente exista
 
@@ -24,9 +24,6 @@ const BeerList = () => {
   const filteredBeers = beers.filter(beer =>
     beer.name.toLowerCase().includes(search.toLowerCase())
   );
-
-  console.log('Beers:', beers); // Verificar el estado de beers
-  console.log('Filtered Beers:', filteredBeers); // Verificar el estado de filteredBeers
 
   return (
     <View style={styles.container}>

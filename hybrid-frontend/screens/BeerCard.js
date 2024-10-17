@@ -1,19 +1,29 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const BeerCard = ({ beer }) => {
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    // Navegamos a la pantalla de detalles con la cerveza seleccionada
+    navigation.navigate('BeerDetails', { beer });
+  };
+
   return (
-    <View style={styles.card}>
-      <Image
-        style={styles.image}
-        source={{ uri: beer.image_url || 'https://via.placeholder.com/100' }} // Placeholder si no hay imagen
-      />
-      <View style={styles.info}>
-        <Text style={styles.name}>{beer.name}</Text>
-        <Text style={styles.manufacturer}>{beer.manufacturer}</Text>
-        <Text style={styles.description}>{beer.description}</Text>
+    <TouchableOpacity onPress={handlePress}>
+      <View style={styles.card}>
+        <Image
+          style={styles.image}
+          source={{ uri: beer.image_url || 'https://via.placeholder.com/100' }}
+        />
+        <View style={styles.info}>
+          <Text style={styles.name}>{beer.name}</Text>
+          <Text style={styles.manufacturer}>{beer.manufacturer}</Text>
+          <Text style={styles.description}>{beer.description}</Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

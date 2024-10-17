@@ -37,6 +37,9 @@ Rails.application.routes.draw do
       end
 
       resources :beers
+      resources :brands, only: [:show]  
+      resources :breweries, only: [:show]  
+
       resources :users, only: [:index,:show, :create, :update] do
         member do
           get 'friendships'
