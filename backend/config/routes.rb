@@ -39,6 +39,7 @@ Rails.application.routes.draw do
       resources :beers
       resources :brands, only: [:show]  
       resources :breweries, only: [:show]  
+      resources :bars_beers, only: [:index, :show, :create, :destroy]
 
       resources :users, only: [:index,:show, :create, :update] do
         member do
