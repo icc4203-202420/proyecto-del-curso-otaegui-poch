@@ -71,7 +71,7 @@ export default function LoginScreen() {
         required
       />
       <Button title="Iniciar Sesión" onPress={handleLogin} />
-      <Button title="¿No tienes una cuenta? Regístrate" onPress={goToSignup} />
+      <Button title="¿No tienes una cuenta? Regístrate" onPress={() => navigation.navigate('SignUp')} />
     </View>
   );
 }
