@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, Button, Modal, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, FlatList, Button } from 'react-native';
 
-const BeerDetailsScreen = ({ route }) => {
+const BeerDetailsScreen = ({ route, navigation }) => {
   const { beer } = route.params;
   const [brewery, setBrewery] = useState(null);
   const [bars, setBars] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [reviewText, setReviewText] = useState('');
-  const [rating, setRating] = useState('');
-  
+
   useEffect(() => {
     const fetchDetails = async () => {
       try {
@@ -31,41 +28,6 @@ const BeerDetailsScreen = ({ route }) => {
 
     fetchDetails();
   }, [beer.brand_id, beer.id]);
-
-  const handleReviewSubmit = async () => {
-    if (!rating || !reviewText) {
-      Alert.alert('Error', 'Por favor, proporciona una calificación y una reseña.');
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://192.168.1.100:3000/api/v1/reviews`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          review: {
-            text: reviewText,
-            rating: parseFloat(rating),
-            user_id: 1, // Cambia este valor por el ID real del usuario logueado
-            beer_id: beer.id,
-          },
-        }),
-      });
-
-      if (response.ok) {
-        Alert.alert('¡Éxito!', 'Tu reseña ha sido enviada.');
-        setModalVisible(false);
-        setReviewText('');
-        setRating('');
-      } else {
-        Alert.alert('Error', 'No se pudo enviar la reseña. Inténtalo nuevamente.');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -91,37 +53,17 @@ const BeerDetailsScreen = ({ route }) => {
         <Text>No hay bares disponibles para esta cerveza.</Text>
       )}
 
-      {/* Botón para hacer una reseña */}
-      <Button title="Hacer una reseña" onPress={() => setModalVisible(true)} />
+      {/* Botón para navegar a la pantalla de reseña */}
+      <Button
+        title="Hacer una reseña"
+        onPress={() => navigation.navigate('ReviewScreen', { beerId: beer.id })}
+      />
 
-      {/* Modal para escribir reseña */}
-      <Modal visible={modalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Agregar Reseña</Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Escribe tu reseña..."
-            value={reviewText}
-            onChangeText={setReviewText}
-            multiline={true}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Calificación (0-5)"
-            value={rating}
-            onChangeText={setRating}
-            keyboardType="numeric"
-          />
-
-          <TouchableOpacity style={styles.submitButton} onPress={handleReviewSubmit}>
-            <Text style={styles.submitButtonText}>Enviar</Text>
-          </TouchableOpacity>
-
-          <Button title="Cerrar" onPress={() => setModalVisible(false)} />
-        </View>
-      </Modal>
+      {/* Nuevo botón para ver reseñas */}
+      <Button
+        title="Ver reseñas"
+        onPress={() => navigation.navigate('ReviewListScreen', { beerId: beer.id })}
+      />
     </View>
   );
 };
@@ -174,37 +116,6 @@ const styles = StyleSheet.create({
   barName: {
     fontSize: 16,
     marginTop: 4,
-  },
-  modalView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#fff',
-  },
-  input: {
-    width: '100%',
-    padding: 10,
-    marginVertical: 8,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-  },
-  submitButton: {
-    backgroundColor: '#2196F3',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-  },
-  submitButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
   },
 });
 

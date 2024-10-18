@@ -1,10 +1,10 @@
 class API::V1::ReviewsController < ApplicationController
   respond_to :json
-  before_action :set_user, only: [:index, :create]
+  before_action :set_user, only: [ :create]
   before_action :set_review, only: [:show, :update, :destroy]
 
   def index
-    @reviews = Review.where(user: @user)
+    @reviews = Review.where(beer_id: params[:beer_id]) # Filtra por beer_id
     render json: { reviews: @reviews }, status: :ok
   end
 
@@ -16,7 +16,6 @@ class API::V1::ReviewsController < ApplicationController
     end
   end
 
-  
   def create
     @review = @user.reviews.build(review_params)
     if @review.save
@@ -47,7 +46,16 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def set_user
-    @user = User.find(params[:review][:user_id]) # Buscar el user_id dentro del hash de review
+    if params[:review] && params[:review][:user_id]
+      @user = User.find(params[:review][:user_id])
+    elsif params[:user_id] # Podrías enviar el user_id directamente como parámetro en la URL
+      @user = User.find(params[:user_id])
+    else
+      # Otra opción es obtener al usuario de la sesión o autenticación, según tu implementación
+      @user = current_user # Por ejemplo, si tienes Devise o algún sistema de autenticación
+    end
+  
+    render json: { error: "User not found" }, status: :not_found unless @user
   end
 
   def review_params
