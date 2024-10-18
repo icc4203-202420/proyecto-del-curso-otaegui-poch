@@ -37,7 +37,7 @@ const BeerDetailsScreen = ({ route, navigation }) => {
       />
       <Text style={styles.name}>{beer.name}</Text>
       <Text style={styles.manufacturer}>Estilo: {beer.style}</Text>
-      <Text style={styles.alcohol}>Alcohol: {beer.alcohol}%</Text>
+      <Text style={styles.alcohol}>Alcohol: {beer.alcohol}</Text>
       <Text style={styles.ibu}>IBU: {beer.ibu}</Text>
       <Text style={styles.rating}>Calificación promedio: {beer.avg_rating}</Text>
       <Text style={styles.brewery}>Cervecería: {brewery ? brewery.name : 'Cargando...'}</Text>

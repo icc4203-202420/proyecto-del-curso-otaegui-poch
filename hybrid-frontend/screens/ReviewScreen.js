@@ -7,11 +7,29 @@ const ReviewScreen = ({ route, navigation }) => {
   const [rating, setRating] = useState('');
 
   const handleReviewSubmit = async () => {
+    // Verificar si la calificación está vacía o la reseña tiene menos de 15 palabras
     if (!rating || !reviewText) {
       Alert.alert('Error', 'Por favor, proporciona una calificación y una reseña.');
       return;
     }
-
+  
+    // Verificar que la reseña tenga al menos 15 palabras
+    const wordCount = reviewText.trim().split(/\s+/).length;
+    if (wordCount < 15) {
+      Alert.alert('Error', 'La reseña debe tener al menos 15 palabras.');
+      return;
+    }
+  
+    // Reemplazar coma por punto en la calificación
+    const normalizedRating = rating.replace(',', '.');
+  
+    // Verificar que la calificación sea un número entre 0 y 5
+    const parsedRating = parseFloat(normalizedRating);
+    if (isNaN(parsedRating) || parsedRating < 0 || parsedRating > 5) {
+      Alert.alert('Error', 'La calificación debe ser un número entre 0 y 5.');
+      return;
+    }
+  
     try {
       const response = await fetch(`http://192.168.1.100:3000/api/v1/reviews`, {
         method: 'POST',
@@ -21,13 +39,13 @@ const ReviewScreen = ({ route, navigation }) => {
         body: JSON.stringify({
           review: {
             text: reviewText,
-            rating: parseFloat(rating),
+            rating: parsedRating,
             user_id: 1, // Cambia este valor por el ID real del usuario logueado
             beer_id: beerId,
           },
         }),
       });
-
+  
       if (response.ok) {
         Alert.alert('¡Éxito!', 'Tu reseña ha sido enviada.');
         navigation.goBack(); // Vuelve a la pantalla anterior
@@ -36,6 +54,7 @@ const ReviewScreen = ({ route, navigation }) => {
       }
     } catch (error) {
       console.error(error);
+      Alert.alert('Error', 'Ocurrió un error al enviar la reseña. Inténtalo nuevamente.');
     }
   };
 

@@ -9,6 +9,7 @@ import BeerDetailsScreen from './screens/BeerDetailsScreen';
 import ReviewScreen from './screens/ReviewScreen'; 
 import ReviewListScreen from './screens/ReviewListScreen';
 
+
 const Stack = createStackNavigator();
 
 export default function App() {

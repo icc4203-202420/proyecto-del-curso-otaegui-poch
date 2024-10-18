@@ -72,50 +72,50 @@ if Rails.env.development?
   end
 
 
-  require 'faker'
-  require 'open-uri'
+  # require 'faker'
+  # require 'open-uri'
   
-  # Ruta a la carpeta de imágenes
-  images_path = Rails.root.join('public', 'seeds', 'images')
+  # # Ruta a la carpeta de imágenes
+  # images_path = Rails.root.join('public', 'seeds', 'images')
   
-  # Crea la carpeta si no existe
-  Dir.mkdir(images_path) unless Dir.exist?(images_path)
+  # # Crea la carpeta si no existe
+  # Dir.mkdir(images_path) unless Dir.exist?(images_path)
   
-  # Método para descargar y guardar una imagen desde una URL
-  def download_image(url, file_path)
-    File.open(file_path, 'wb') do |file|
-      file << URI.open(url).read
-    end
-  end
+  # # Método para descargar y guardar una imagen desde una URL
+  # def download_image(url, file_path)
+  #   File.open(file_path, 'wb') do |file|
+  #     file << URI.open(url).read
+  #   end
+  # end
   
-  # Itera sobre los eventos y les asigna imágenes generadas
-  Event.all.each do |event|
-    num_images = rand(12..20)
+  # # Itera sobre los eventos y les asigna imágenes generadas
+  # Event.all.each do |event|
+  #   num_images = rand(12..20)
   
-    pictures_urls = (1..num_images).map do |i|
-      image_file_name = "event_#{event.id}_image_#{i}.png"
-      image_file_path = File.join(images_path, image_file_name)
+  #   pictures_urls = (1..num_images).map do |i|
+  #     image_file_name = "event_#{event.id}_image_#{i}.png"
+  #     image_file_path = File.join(images_path, image_file_name)
   
-      # Generar la URL de la imagen aleatoria
-      image_url = "https://picsum.photos/200/300?random=#{rand(1..1000)}"
+  #     # Generar la URL de la imagen aleatoria
+  #     image_url = "https://picsum.photos/200/300?random=#{rand(1..1000)}"
   
-      # Descargar y guardar la imagen
-      download_image(image_url, image_file_path)
+  #     # Descargar y guardar la imagen
+  #     download_image(image_url, image_file_path)
   
-      # Retornar la ruta relativa para guardarla en la base de datos
-      File.join('seeds/images', image_file_name)
-    end
+  #     # Retornar la ruta relativa para guardarla en la base de datos
+  #     File.join('seeds/images', image_file_name)
+  #   end
   
-    # Crea el registro de EventPicture
-    EventPicture.create!(
-      event: event,
-      user: User.all.sample,
-      description: Faker::Lorem.sentence(word_count: 10),
-      created_at: Time.now,
-      updated_at: Time.now,
-      pictures_url: pictures_urls
-    )
-  end
+  #   # Crea el registro de EventPicture
+  #   EventPicture.create!(
+  #     event: event,
+  #     user: User.all.sample,
+  #     description: Faker::Lorem.sentence(word_count: 10),
+  #     created_at: Time.now,
+  #     updated_at: Time.now,
+  #     pictures_url: pictures_urls
+  #   )
+  # end
   
   
 
