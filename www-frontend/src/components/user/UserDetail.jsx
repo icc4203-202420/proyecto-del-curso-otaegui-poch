@@ -4,33 +4,32 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
 const UserDetail = () => {
-  const { id } = useParams(); // Obtener el ID del usuario de los parámetros de la URL
+  const { id } = useParams();
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState("");
-  const [error, setError] = useState(null); // Estado para manejar errores
+  const [isFriend, setIsFriend] = useState(false); // Nuevo estado para verificar si ya son amigos
+  const [error, setError] = useState(null);
 
-  // Obtener los detalles del usuario al montar el componente
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/v1/users/${id}`); // Llamada a la API para obtener el usuario
-        setUser(response.data); // Guardar los detalles del usuario en el estado
+        const response = await axios.get(`http://localhost:3001/api/v1/users/${id}`);
+        setUser(response.data);
       } catch (error) {
         console.error('Error fetching user details:', error);
-        setError('Error fetching user details'); // Manejar errores
+        setError('Error fetching user details');
       }
     };
 
     fetchUserDetail();
   }, [id]);
 
-  // Obtener la lista de eventos al montar el componente
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/v1/events');
-        setEvents(response.data); // Guardar eventos en el estado
+        setEvents(response.data);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -38,11 +37,35 @@ const UserDetail = () => {
     fetchEvents();
   }, []);
 
+  // Nueva función para verificar si ya son amigos
+  useEffect(() => {
+    const checkFriendship = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        const userId = currentUser ? currentUser.id : null;
+
+        if (!userId || !id) return;
+
+        const response = await axios.get(`http://localhost:3001/api/v1/users/${userId}/friendships`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const isFriend = response.data.some(friend => friend.id === parseInt(id));
+        setIsFriend(isFriend);
+      } catch (error) {
+        console.error('Error checking friendship status:', error);
+      }
+    };
+
+    checkFriendship();
+  }, [id]);
+
   const handleAddFriend = async (friendId) => {
     try {
-      const token = localStorage.getItem('authToken'); // Obtener el token de autenticación
-      const currentUser = JSON.parse(localStorage.getItem('current_user')); // Obtener el objeto de usuario
-      const userId = currentUser ? currentUser.id : null; // Acceder al ID del usuario
+      const token = localStorage.getItem('authToken');
+      const currentUser = JSON.parse(localStorage.getItem('current_user'));
+      const userId = currentUser ? currentUser.id : null;
 
       if (!userId || !friendId) {
         console.error('IDs faltantes: userId o friendId');
@@ -51,28 +74,59 @@ const UserDetail = () => {
 
       const response = await axios.post(
         `http://localhost:3001/api/v1/users/${friendId}/friendships`,
-        { user_id: userId }, // Enviar el userId en el cuerpo de la solicitud
+        { user_id: userId },
         {
           headers: {
-            'Authorization': `Bearer ${token}`, // Enviar el token si es necesario
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
       );
 
-      console.log('Amigo agregado:', response.data); // Registro de éxito
+      console.log('Amigo agregado:', response.data);
+      setIsFriend(true); // Cambia el estado a amigo después de agregar
       alert('Amigo agregado exitosamente');
     } catch (error) {
       console.error('Error al agregar amigo:', error);
-      setError('Error al agregar amigo'); // Manejar errores
+      setError('Error al agregar amigo');
     }
   };
 
-  // Renderizar un mensaje de error si hay uno
+  // Nueva función para manejar la eliminación de amigo
+  const handleRemoveFriend = async (friendId) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const currentUser = JSON.parse(localStorage.getItem('current_user'));
+      const userId = currentUser ? currentUser.id : null;
+
+      if (!userId || !friendId) {
+        console.error('IDs faltantes: userId o friendId');
+        return;
+      }
+
+      const response = await axios.delete(
+        `http://localhost:3001/api/v1/users/${friendId}/friendships`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          data: { user_id: userId },
+        }
+      );
+
+      console.log('Amigo eliminado:', response.data);
+      setIsFriend(false); // Cambia el estado a no amigo después de eliminar
+      alert('Amigo eliminado exitosamente');
+    } catch (error) {
+      console.error('Error al eliminar amigo:', error);
+      setError('Error al eliminar amigo');
+    }
+  };
+
   if (error) {
     return <Typography color="error">{error}</Typography>;
   }
-  // Si no hay usuario, mostrar un mensaje de carga o un estado vacío
+
   if (!user) {
     return <Typography>Loading...</Typography>;
   }
@@ -97,7 +151,6 @@ const UserDetail = () => {
             ID: {user.id}
           </Typography>
 
-          {/* Selector de evento */}
           <TextField
             select
             label="Event where you met"
@@ -114,15 +167,15 @@ const UserDetail = () => {
             ))}
           </TextField>
 
-          {/* Botón "Add Friend" */}
+          {/* Botón que cambia entre "Agregar" y "Eliminar" amigo */}
           <Button
             variant="contained"
-            color="primary"
-            onClick={() => handleAddFriend(user.id)}
+            color={isFriend ? "secondary" : "primary"}
+            onClick={() => isFriend ? handleRemoveFriend(user.id) : handleAddFriend(user.id)}
             style={{ marginTop: '16px' }}
-            disabled={!selectedEvent} // Deshabilitar si no se selecciona un evento
+            disabled={!selectedEvent}
           >
-            Add Friend
+            {isFriend ? "Remove Friend" : "Add Friend"}
           </Button>
         </CardContent>
       </Card>
