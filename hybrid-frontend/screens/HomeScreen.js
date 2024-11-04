@@ -23,6 +23,14 @@ export default function HomeScreen({ navigation }) {
         title="Buscar Cervezas"
         onPress={() => navigation.navigate('BeerSearch')}
       />
+      <Button
+        title="Usuarios"
+        onPress={() => navigation.navigate('UserList')}
+      />
+       <Button
+        title="Eventos"
+        onPress={() => navigation.navigate('EventList')} // Navega a la pantalla de eventos
+      />
     </View>
   );
 }

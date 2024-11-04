@@ -8,6 +8,8 @@ import SignUpScreen from './screens/SignUpScreen';
 import BeerDetailsScreen from './screens/BeerDetailsScreen';
 import ReviewScreen from './screens/ReviewScreen'; 
 import ReviewListScreen from './screens/ReviewListScreen';
+import UserList from './screens/UserList'; 
+import EventList from './screens/EventList'; 
 
 
 const Stack = createStackNavigator();
@@ -23,6 +25,12 @@ export default function App() {
         <Stack.Screen name="BeerDetails" component={BeerDetailsScreen} options={{ title: 'Detalles de la Cerveza' }} /> 
         <Stack.Screen name="ReviewScreen" component={ReviewScreen} options={{ title: 'Agregar Reseña' }} />
         <Stack.Screen name="ReviewListScreen" component={ReviewListScreen} options={{ title: 'Ver Reseña' }} />
+        <Stack.Screen name="UserList" component={UserList} />
+        <Stack.Screen
+          name="EventList"
+          component={EventList}
+          options={{ title: 'Lista de Eventos' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
