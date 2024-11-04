@@ -70,13 +70,18 @@ function Home() {
             </StyledButton>
           </Grid>
           <Grid item>
-            <StyledButton component={Link} to="/search" variant="contained" color="info">
+            <StyledButton component={Link} to="/users" variant="contained" color="info">
               Search Users
             </StyledButton>
           </Grid>
           <Grid item>
             <StyledButton component={Link} to="/map" variant="contained" color="warning">
               Map
+            </StyledButton>
+          </Grid>
+          <Grid item>
+            <StyledButton component={Link} to="/friends" variant="contained" color="success">
+              Friends
             </StyledButton>
           </Grid>
           <Grid item>

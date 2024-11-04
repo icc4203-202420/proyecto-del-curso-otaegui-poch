@@ -4,14 +4,14 @@ import Home from './components/Home.jsx';
 import BeerList from './components/beers/BeerList.jsx';
 import BarList from './components/bars/BarList.jsx';
 import EventList from './components/events/EventList.jsx';
-import UserSearch from './components/UserSearch.jsx';
 import RegistrationForm from './components/registration/RegistrationForm.jsx';
 import LoginForm from './components/login/LoginForm.jsx';
 import BarDetail from './components/bars/BarDetail.jsx';
 import BottomNavbar from './components/navbar/BottomNavbar';  // Asegúrate de la ruta correcta
 import MapComponent from './components/map/MapComponent';
 import UserList from './components/user/UserList.jsx';
-
+import UserDetails from './components/user/UserDetail.jsx';
+import FriendList from './components/friends/ViewFriends.jsx';
 import EventDetail from './components/events/EventDetail';
 
 import EventPictures from './components/events/EventPictures.jsx';
@@ -27,12 +27,15 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<LoginForm />} />
         <Route path="/signup" element={<RegistrationForm />} />
+          
         <Route path="/Home" element={<Home />} />
         <Route path="/beers" element={<BeerList />} />
         <Route path="/bars" element={<BarList />} />
         <Route path="/bars/:id" element={<BarDetail />} />
         <Route path="/events" element={<EventList />} />
-        <Route path="/search" element={<UserList />} />
+        <Route path="/users" element={<UserList />} />
+        <Route path="/friends" element={<FriendList />} />
+        <Route path="/users/:id" element={<UserDetails />} />
         <Route path="/map" element={<MapComponent />} />
         <Route path="/event/:id" element={<EventDetail />} />
         <Route path="/event/:id/gallery" element={<EventPictures />} />

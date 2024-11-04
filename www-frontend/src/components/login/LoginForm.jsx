@@ -36,11 +36,30 @@ const LoginForm = () => {
         const success = statusCode === 200; // Verifica que el código sea 200
         const message = data.status?.message || 'Inicio de sesión exitoso';
         const token = data.status?.data?.token; // Extrae el token si está disponible
+        const user = data.status?.data?.user
         console.log(token)
+        console.log(user)
+        console.log(user.id)
 
         if (success) {
           if (token) {
-            localStorage.setItem('authToken', token); // Almacena el token
+            // Guarda el token en localStorage
+            localStorage.setItem('authToken', token);
+            
+            // Guarda el objeto user en localStorage como JSON
+            localStorage.setItem('current_user', JSON.stringify({
+                email: user.email,
+                first_name: user.first_name,
+                id: user.id,
+                last_name: user.last_name
+            }));
+            
+            console.log('Datos guardados en localStorage:', {
+                email: user.email,
+                first_name: user.first_name,
+                id: user.id,
+                last_name: user.last_name
+            });
           }
           setOpenSuccess(true); // Mostrar snackbar de éxito
           setTimeout(() => {

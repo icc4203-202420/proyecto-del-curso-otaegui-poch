@@ -1,9 +1,12 @@
 class API::V1::UsersController < ApplicationController
-  before_action :authenticate_user!, except: [:show, :index, :create, :create_friendship]
+  #before_action :authenticate_user!, except: [:show, :index, :create]
 
   respond_to :json
-  before_action :set_user, only: [:show, :update, :friendships, :create_friendship]
-  before_action :verify_jwt_token, only: [:update]
+  before_action :set_user, only: [:show, :update, :friendships]
+
+  def current_user
+    @current_user ||= User.find_by(id: session[:user_id])  # Esto puede variar dependiendo de cómo implementes la autenticación.
+  end
 
   def index
     @users = User.all
@@ -22,41 +25,40 @@ class API::V1::UsersController < ApplicationController
       render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
   end
-  
-  # GET /api/v1/users/:id/friendships
 
+  # GET /api/v1/users/:id/friendships
   def friendships
-    friends = User.joins(:friendships)
-                  .where(friendships: { user_id: @user.id })
-                  .or(User.joins(:friendships)
-                  .where(friendships: { friend_id: @user.id }))
-                  .where.not(id: @user.id)
-  
-    if friends.any?
-      render json: friends, status: :ok
-    else
-      render json: { error: "No friendships found for user with ID #{@user.id}" }, status: :not_found
-    end
+    user_id = params[:id]  # Este es el ID del usuario cuyo amistades queremos obtener
+    friendships = Friendship.where(user_id: user_id)  # Busca todas las amistades del usuario
+
+    # Extrae los IDs de los amigos
+    friend_ids = friendships.pluck(:friend_id)
+
+    # Busca los detalles de los amigos
+    friends = User.where(id: friend_ids)
+
+    # Renderiza la respuesta en formato JSON
+    render json: friends, status: :ok
   end
 
-
-  # POST /api/v1/users/:id/friendships
-
   def create_friendship
-    user = User.find(1) # despues cambiar a current user
-    friend = User.find_by(id: friendship_params[:friend_id])
-    
-    if friend
-      friendship = user.friendships.build(friend_id: friend.id, bar_id: friendship_params[:bar_id])
-      
-      if friendship.save
-        render json: { message: 'Friendship created successfully' }, status: :created
-      else
-        render json: friendship.errors, status: :unprocessable_entity
-      end
+    friend_id = params[:id]        # ID del amigo que estás intentando agregar
+    user_id = JSON.parse(request.body.read)['user_id']     # Este será el ID del usuario actual, pero proviene del cuerpo de la solicitud
+  
+    if user_id && friend_id
+      # Crea la relación de amistad, asegurándote de que ambos IDs sean válidos
+      Friendship.create(user_id: user_id, friend_id: friend_id)
+      render json: { message: 'Amistad creada con éxito' }, status: :created
     else
-      render json: { error: 'Friend not found' }, status: :not_found
+      render json: { error: 'Faltan datos' }, status: :unprocessable_entity
     end
+  end
+  
+  
+  # GET /api/v1/users/search
+  def search
+    @users = User.where("handle ILIKE ?", "%#{params[:handle]}%")
+    render json: { users: @users }, status: :ok
   end
 
   def update
@@ -64,20 +66,6 @@ class API::V1::UsersController < ApplicationController
       render :show, status: :ok, location: api_v1_users_path(@user)
     else
       render json: @user.errors, status: :unprocessable_entity
-    end
-  end
-
-  def authenticate_user!
-    token = request.headers['Authorization']
-    if token.present?
-      begin
-        decoded_token = JsonWebToken.decode(token.split(' ').last)
-        @current_user = User.find(decoded_token[:user_id])
-      rescue JWT::DecodeError
-        render json: { errors: 'Token no válido' }, status: :unauthorized
-      end
-    else
-      render json: { errors: 'Token no proporcionado' }, status: :unauthorized
     end
   end
 
@@ -91,19 +79,6 @@ class API::V1::UsersController < ApplicationController
     params.require(:user).permit(
       :first_name, :last_name, :email, :handle,
       :password, :password_confirmation
-      
     )
-  end
-
-  def friendship_params
-    params.permit(:friend_id, :bar_id)
-  end
-
-  def authenticate_user!
-    token = request.headers['Authorization']
-    decoded_token = JsonWebToken.decode(token)
-
-    @current_user = User.find(decoded_token[:user_id]) if decoded_token
-    render json: { errors: ['Not Authenticated'] }, status: :unauthorized unless @current_user
   end
 end
