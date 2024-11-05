@@ -6,7 +6,7 @@ export default function EventDetail({ route }) {
 
   const handleCheckIn = async () => {
     try {
-      const response = await fetch(`http://192.168.1.100:3000api/v1/events/${event.id}/check_in`, {
+      const response = await fetch(`http://192.168.1.100:3000/api/v1/events/${event.id}/check_in`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
