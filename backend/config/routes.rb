@@ -41,6 +41,7 @@ Rails.application.routes.draw do
         member do
           get 'friendships', to: 'users#friendships'
           post 'friendships', to: 'users#create_friendship'
+          delete 'friendships', to: 'users#destroy_friendship'
         end
 
         # Endpoint para obtener todas las reseñas de un usuario

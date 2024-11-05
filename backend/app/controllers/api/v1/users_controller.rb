@@ -53,6 +53,16 @@ class API::V1::UsersController < ApplicationController
       render json: { error: 'Faltan datos' }, status: :unprocessable_entity
     end
   end
+
+    # Eliminar una amistad
+  def destroy_friendship
+    friend = User.find(params[:friend_id])
+    if current_user.friends.destroy(friend)
+      render json: { message: "Amistad eliminada exitosamente" }, status: :ok
+    else
+      render json: { error: "No se pudo eliminar la amistad" }, status: :unprocessable_entity
+    end
+  end
   
   
   # GET /api/v1/users/search

@@ -1,4 +1,3 @@
-// UserCard.js
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -12,19 +11,20 @@ const UserCard = ({ user }) => {
     };
 
     return (
-        <TouchableOpacity onPress={handlePress}>
-            <View style={styles.card}>
-                <Image
-                    style={styles.image}
-                    source={{ uri: user.image_url || 'https://via.placeholder.com/100' }} // Cambia esto si tienes una imagen específica
-                />
-                <View style={styles.info}>
-                    <Text style={styles.handle}>{user.handle}</Text>
-                    <Text style={styles.name}>{user.first_name}</Text>
-                    
-                </View>
+        <View style={styles.card}>
+            <Image
+                style={styles.image}
+                source={{ uri: user.image_url || 'https://via.placeholder.com/100' }} // Cambia esto si tienes una imagen específica
+            />
+            <View style={styles.info}>
+                <Text style={styles.handle}>{user.handle}</Text>
+                <Text style={styles.name}>{user.first_name}</Text>
             </View>
-        </TouchableOpacity>
+            {/* Botón para ver detalles del usuario */}
+            <TouchableOpacity style={styles.detailsButton} onPress={handlePress}>
+                <Text style={styles.buttonText}>Ver Detalles</Text>
+            </TouchableOpacity>
+        </View>
     );
 };
 
@@ -59,9 +59,16 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'gray',
     },
-    bio: {
-        fontSize: 12,
-        color: 'gray',
+    detailsButton: {
+        backgroundColor: '#007bff', // Color del botón
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 4,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
     },
 });
 
