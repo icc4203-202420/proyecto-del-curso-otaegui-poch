@@ -11,6 +11,7 @@ import ReviewListScreen from './screens/review/ReviewListScreen';
 import UserList from './screens/user/UserList'; 
 import EventList from './screens/event/EventList'; 
 import UserDetail from './screens/user/UserDetail';
+import EventDetail from './screens/event/EventDetails'; 
 
 const Stack = createStackNavigator();
 
@@ -23,15 +24,12 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Home' }} />
         <Stack.Screen name="BeerSearch" component={BeerList} options={{ title: 'Buscar Cervezas' }} />
         <Stack.Screen name="BeerDetails" component={BeerDetailsScreen} options={{ title: 'Detalles de la Cerveza' }} /> 
-        <Stack.Screen name="UserDetail" component={UserDetail} options={{ title: 'Ver amigo' }} />
+        <Stack.Screen name="UserDetails" component={UserDetail} options={{ title: 'Ver amigo' }} />
         <Stack.Screen name="ReviewScreen" component={ReviewScreen} options={{ title: 'Agregar Reseña' }} />
         <Stack.Screen name="ReviewListScreen" component={ReviewListScreen} options={{ title: 'Ver Reseña' }} />
         <Stack.Screen name="UserList" component={UserList} />
-        <Stack.Screen
-          name="EventList"
-          component={EventList}
-          options={{ title: 'Lista de Eventos' }}
-        />
+        <Stack.Screen name="EventList" component={EventList} options={{ title: 'Lista de Eventos' }} />
+        <Stack.Screen name="EventDetails" component={EventDetail} options={{ title: 'Detalle Evento' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

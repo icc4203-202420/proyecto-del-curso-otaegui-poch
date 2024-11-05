@@ -40,7 +40,7 @@ module API
       
       def check_in
         event = Event.find(params[:id])
-        attendance = Attendance.find_or_initialize_by(user: current_user, event: event)
+        attendance = Attendance.find_or_initialize_by(event: event, user_id: nil)
     
         if attendance.update(checked_in: true)
           render json: { message: 'Checked in successfully' }, status: :ok
