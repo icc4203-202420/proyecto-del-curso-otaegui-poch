@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, Button, Alert, StyleSheet } from 'react-native';
 
-export default function UserDetail({ route }) {
-  const { user } = route.params;
+export default function EventDetail({ route }) {
+  const { event } = route.params;
 
-  const handleSendMessage = async () => {
+  const handleCheckIn = async () => {
     try {
-      const response = await fetch(`http://192.168.1.100:3000/api/v1/users/${user.id}/send_message`, {
+      const response = await fetch(`http://192.168.1.100:3000/api/v1/events/${event.id}/check_in`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -17,9 +17,9 @@ export default function UserDetail({ route }) {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert("Mensaje Enviado", data.message || "Mensaje enviado exitosamente.");
+        Alert.alert("Check In", data.message || "Check-in realizado exitosamente.");
       } else {
-        Alert.alert("Error", data.errors ? data.errors.join(", ") : "Error al enviar el mensaje.");
+        Alert.alert("Error", data.errors ? data.errors.join(", ") : "Error al realizar el check-in.");
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.");
@@ -28,10 +28,9 @@ export default function UserDetail({ route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{user.name}</Text>
-      <Text style={styles.email}>Correo: {user.email}</Text>
-      <Text style={styles.date}>Registrado el: {new Date(user.created_at).toLocaleDateString()}</Text>
-      <Button title="Send Message" onPress={handleSendMessage} color="#007AFF" />
+      <Text style={styles.title}>{event.name}</Text>
+      <Text style={styles.date}>Fecha: {new Date(event.date).toLocaleDateString()}</Text>
+      <Button title="Check In" onPress={handleCheckIn} color="#007AFF" />
     </View>
   );
 }
@@ -49,14 +48,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  email: {
+  date: {
     fontSize: 18,
     color: '#666',
-    marginTop: 10,
-  },
-  date: {
-    fontSize: 16,
-    color: '#888',
     marginTop: 10,
     marginBottom: 20,
   },
