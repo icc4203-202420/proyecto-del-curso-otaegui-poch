@@ -12,6 +12,8 @@ import UserList from './screens/user/UserList';
 import EventList from './screens/event/EventList'; 
 import UserDetail from './screens/user/UserDetail';
 import EventDetail from './screens/event/EventDetails'; 
+import Feed from './screens/Feed';
+
 
 const Stack = createStackNavigator();
 
@@ -19,6 +21,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Feed" component={Feed} options={{ title: 'Feed' }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Log In' }} />
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ title: 'Sign Up' }} /> 
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Home' }} />

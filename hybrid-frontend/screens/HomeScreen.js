@@ -31,6 +31,10 @@ export default function HomeScreen({ navigation }) {
         title="Eventos"
         onPress={() => navigation.navigate('EventList')} // Navega a la pantalla de eventos
       />
+      <Button
+        title="Feed"
+        onPress={() => navigation.navigate('Feed')}
+      />
     </View>
   );
 }

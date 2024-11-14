@@ -63,6 +63,34 @@ class API::V1::UsersController < ApplicationController
       render json: { error: "No se pudo eliminar la amistad" }, status: :unprocessable_entity
     end
   end
+
+  # Acción para obtener el feed del usuario
+  def feed
+    # Obtener el usuario actual
+    user = current_user
+
+    # Obtener las publicaciones de las amistades
+    friendships = user.friends
+
+    # Obtener todas las publicaciones de las amistades, reseñas y fotos de los bares
+    posts = []
+
+    # Obtener publicaciones de las amistades
+    friendships.each do |friend|
+      posts += friend.posts # Suponiendo que existe un método `posts` en el modelo de `Friendship`
+    end
+
+    # Obtener publicaciones de los bares donde el usuario haya escrito algo
+    user.bars.each do |bar|
+      posts += bar.posts # Suponiendo que hay un modelo `Post` asociado a `Bar`
+    end
+
+    # Ordenar las publicaciones por fecha, de la más reciente a la más antigua
+    posts.sort_by!(&:created_at).reverse!
+
+    # Devolver las publicaciones en formato JSON
+    render json: posts, each_serializer: EventPostSerializer
+  end
   
   
   # GET /api/v1/users/search

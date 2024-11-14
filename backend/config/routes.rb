@@ -21,6 +21,10 @@ Rails.application.routes.draw do
 
       # Rutas para eventos con acciones personalizadas
       resources :events, only: [:index, :show, :create, :update, :destroy] do
+        collection do
+          get 'feed'
+        end
+
         member do
           post 'check_in'
           post 'upload_picture'
@@ -38,6 +42,9 @@ Rails.application.routes.draw do
       # Rutas para usuarios y sus relaciones de amistad (friendships)
       resources :users, only: [:index, :show, :create, :update] do
         # Endpoint para obtener amistades de un usuario específico
+        # 
+        get 'feed', on: :member
+        
         member do
           get 'friendships', to: 'users#friendships'
           post 'friendships', to: 'users#create_friendship'

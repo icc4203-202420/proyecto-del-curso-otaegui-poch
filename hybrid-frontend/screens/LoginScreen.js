@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ export default function LoginScreen() {
   const navigation = useNavigation();
 
   const handleLogin = () => {
-    fetch('http://192.168.1.100:3000/api/v1/login', {
+    fetch('http://192.168.1.14:3001/api/v1/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,10 +27,25 @@ export default function LoginScreen() {
         const statusCode = data.status?.code || 0;
         const success = statusCode === 200;
         const token = data.status?.data?.token;
-
+        const user = data.status?.data?.user;
+        
         if (success && token) {
           // Guardar el token (usando AsyncStorage o SecureStore)
-          // AsyncStorage.setItem('authToken', token); // Opción básica para almacenamiento
+          const storeToken = async (token) => {
+            await AsyncStorage.setItem('authToken', token);
+          
+            // Espera a que se haya almacenado el valor
+            const storedToken = await AsyncStorage.getItem('authToken');
+          };
+          
+          storeToken(token);
+
+          AsyncStorage.setItem('current_user', JSON.stringify({
+            email: user.email,
+            first_name: user.first_name,
+            id: user.id,
+            last_name: user.last_name
+          })); 
           
           Alert.alert('Éxito', 'Inicio de sesión exitoso');
           setTimeout(() => {
@@ -37,14 +53,16 @@ export default function LoginScreen() {
           }, 2000); // Espera 2 segundos antes de navegar
         } else {
           setErrorMessage(data.status?.message || 'Error en el inicio de sesión');
-          throw new Error('No se recibió token de autenticación');
+          Alert.alert('Error muy feo', data.status?.message || 'Error en el inicio de sesión');
         }
       })
       .catch((error) => {
         setErrorMessage(error.message || 'Ocurrió un error durante el inicio de sesión');
-        Alert.alert('Error', errorMessage);
+        Alert.alert('Error hola', error.message || 'Ocurrió un error durante el inicio de sesión');
+        console.log(error.message)
       });
   };
+  
 
   const goToSignup = () => {
     navigation.replace('Signup');

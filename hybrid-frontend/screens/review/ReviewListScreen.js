@@ -10,7 +10,7 @@ const ReviewListScreen = ({ route }) => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch(`http://192.168.1.100:3000/api/v1/reviews?beer_id=${beerId}`);
+        const response = await fetch(`http://192.168.1.14:3001/api/v1/reviews?beer_id=${beerId}`);
         if (!response.ok) {
           throw new Error('Error en la obtención de reseñas'); // Maneja errores de la respuesta
         }
