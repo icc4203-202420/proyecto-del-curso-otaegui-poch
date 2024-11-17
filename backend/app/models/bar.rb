@@ -1,5 +1,6 @@
 class Bar < ApplicationRecord
   belongs_to :address
+  belongs_to :user
   has_many :events
   has_many :friendships
 

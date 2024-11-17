@@ -10,7 +10,7 @@ export default function LoginScreen() {
   const navigation = useNavigation();
 
   const handleLogin = () => {
-    fetch('http://192.168.1.14:3001/api/v1/login', {
+    fetch('http://192.168.1.101:3000/api/v1/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

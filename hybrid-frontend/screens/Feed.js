@@ -18,22 +18,22 @@ const Feed = () => {
       try {
         const user = await AsyncStorage.getItem('current_user');
         const authToken = await AsyncStorage.getItem('authToken');
-        setCurrentUser(JSON.parse(user));
-        setToken(JSON.parse(authToken));
+        setCurrentUser(JSON.parse(user)); // Esto es correcto porque el usuario está en formato JSON
+        setToken(authToken); // No uses JSON.parse porque `authToken` es una cadena
       } catch (err) {
         console.error('Error al obtener datos de usuario', err);
       }
     };
-
+  
     fetchUserData();
   }, []);
-
+  
   useEffect(() => {
     if (currentUser && token) {
       // Consulta la API para obtener el feed
       const fetchFeed = async () => {
         try {
-          const response = await axios.get(`http://192.168.1.14:3001/api/v1/users/${currentUser.id}/feed`, {
+          const response = await axios.get(`http://192.168.1.101:3000/api/v1/users/${currentUser.id}/feed`, {
             headers: {
               'Authorization': `Bearer ${token}`,  // Agregar el token JWT
             },

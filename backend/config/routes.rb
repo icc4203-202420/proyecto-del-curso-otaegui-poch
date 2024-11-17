@@ -16,15 +16,23 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      # Rutas de bares y sus eventos relacionados
-      resources :bars, only: [:index, :show, :create, :update, :destroy]
+      # Rutas para usuarios y sus relaciones
+      resources :users do
+        member do
+          get 'friendships'
+          post 'create_friendship'  # Cambiado para coincidir con el endpoint
+          delete 'destroy_friendship'
+          get 'feed'
+        end
+        resources :reviews, only: [:index]
+      end
 
-      # Rutas para eventos con acciones personalizadas
+      # El resto de tus rutas...
+      resources :bars, only: [:index, :show, :create, :update, :destroy]
       resources :events, only: [:index, :show, :create, :update, :destroy] do
         collection do
           get 'feed'
         end
-
         member do
           post 'check_in'
           post 'upload_picture'
@@ -33,29 +41,10 @@ Rails.application.routes.draw do
         end
       end
 
-      # Rutas para cervezas, marcas y cervecerías
       resources :beers
       resources :brands, only: [:show]
       resources :breweries, only: [:show]
       resources :bars_beers, only: [:index, :show, :create, :destroy]
-
-      # Rutas para usuarios y sus relaciones de amistad (friendships)
-      resources :users, only: [:index, :show, :create, :update] do
-        # Endpoint para obtener amistades de un usuario específico
-        # 
-        get 'feed', on: :member
-        
-        member do
-          get 'friendships', to: 'users#friendships'
-          post 'friendships', to: 'users#create_friendship'
-          delete 'friendships', to: 'users#destroy_friendship'
-        end
-
-        # Endpoint para obtener todas las reseñas de un usuario
-        resources :reviews, only: [:index]
-      end
-
-      # Rutas para reseñas generales
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
     end
   end

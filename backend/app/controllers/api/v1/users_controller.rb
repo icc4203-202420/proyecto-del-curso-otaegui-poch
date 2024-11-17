@@ -1,5 +1,6 @@
 class API::V1::UsersController < ApplicationController
   #before_action :authenticate_user!, except: [:show, :index, :create]
+  
 
   respond_to :json
   before_action :set_user, only: [:show, :update, :friendships]
@@ -28,7 +29,7 @@ class API::V1::UsersController < ApplicationController
 
   # GET /api/v1/users/:id/friendships
   def friendships
-    user_id = params[:id]  # Este es el ID del usuario cuyo amistades queremos obtener
+    user_id = decoded_token[:user_id]  # Este es el ID del usuario cuyo amistades queremos obtener
     friendships = Friendship.where(user_id: user_id)  # Busca todas las amistades del usuario
 
     # Extrae los IDs de los amigos
@@ -42,17 +43,28 @@ class API::V1::UsersController < ApplicationController
   end
 
   def create_friendship
-    friend_id = params[:id]        # ID del amigo que estás intentando agregar
-    user_id = JSON.parse(request.body.read)['user_id']     # Este será el ID del usuario actual, pero proviene del cuerpo de la solicitud
-  
-    if user_id && friend_id
-      # Crea la relación de amistad, asegurándote de que ambos IDs sean válidos
-      Friendship.create(user_id: user_id, friend_id: friend_id)
-      render json: { message: 'Amistad creada con éxito' }, status: :created
-    else
-      render json: { error: 'Faltan datos' }, status: :unprocessable_entity
+    Rails.logger.debug "Parameters: #{params.inspect}"
+    user_id = params[:user_id]  # Asegúrate de usar `params[:user_id]` y no `params[:user]`
+
+    # El resto de la lógica sigue igual
+    friend_id = params[:id]
+    existing_friendship = Friendship.find_by(user_id: user_id, friend_id: friend_id)
+
+    if existing_friendship
+        render json: { message: 'Ya son amigos' }, status: :ok
+        return
     end
-  end
+
+    friendship = Friendship.new(user_id: user_id, friend_id: friend_id)
+
+    if friendship.save
+        render json: { message: 'Amistad creada con éxito' }, status: :created
+    else
+        render json: { error: 'No se pudo crear la amistad' }, status: :unprocessable_entity
+    end
+end
+  
+  
 
     # Eliminar una amistad
   def destroy_friendship
@@ -82,7 +94,7 @@ class API::V1::UsersController < ApplicationController
 
     # Obtener publicaciones de los bares donde el usuario haya escrito algo
     user.bars.each do |bar|
-      posts += bar.posts # Suponiendo que hay un modelo `Post` asociado a `Bar`
+      posts += bar.posts
     end
 
     # Ordenar las publicaciones por fecha, de la más reciente a la más antigua
@@ -108,6 +120,21 @@ class API::V1::UsersController < ApplicationController
   end
 
   private
+  def authenticate_user!
+    token = request.headers['Authorization']&.split(' ')&.last
+    if token.nil? || !valid_token?(token)
+      render json: { error: 'No autorizado' }, status: :unauthorized
+    else
+      @current_user = decode_token(token)
+    end
+  end
+  def decoded_token
+    # Aquí decodificamos el token y lo extraemos
+    JWT.decode(request.headers['Authorization'].split(' ').last, Rails.application.secret_key_base).first
+  rescue JWT::DecodeError
+    nil
+  end
+
 
   def set_user
     @user = User.find(params[:id])

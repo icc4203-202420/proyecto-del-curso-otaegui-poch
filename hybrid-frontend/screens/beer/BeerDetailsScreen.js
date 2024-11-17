@@ -18,7 +18,7 @@ const BeerDetailsScreen = ({ route, navigation }) => {
           setBrewery(breweryData);
         }
 
-        const barsResponse = await fetch(`http://192.168.1.14:3001/api/v1/bars_beers?beer_id=${beer.id}`);
+        const barsResponse = await fetch(`http://192.168.1.101:3000/api/v1/bars_beers?beer_id=${beer.id}`);
         const barsData = await barsResponse.json();
         setBars(barsData);
       } catch (error) {
