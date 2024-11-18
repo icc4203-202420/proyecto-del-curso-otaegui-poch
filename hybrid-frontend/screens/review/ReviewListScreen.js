@@ -29,7 +29,7 @@ const ReviewListScreen = ({ route }) => {
     const fetchUsers = async (userIds) => {
       try {
         const userResponses = await Promise.all(userIds.map(userId =>
-          fetch(`http://192.168.1.100:3000/api/v1/users/${userId}`) // Asegúrate de que esta ruta exista
+          fetch(`http://192.168.1.101:3000/api/v1/users/${userId}`) // Asegúrate de que esta ruta exista
         ));
 
         const userData = await Promise.all(userResponses.map(res => res.json()));
