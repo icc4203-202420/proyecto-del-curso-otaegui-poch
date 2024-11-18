@@ -4,8 +4,30 @@ class API::V1::ReviewsController < ApplicationController
   before_action :set_review, only: [:show, :update, :destroy]
 
   def index
-    @reviews = Review.where(beer_id: params[:beer_id]) # Filtra por beer_id
-    render json: { reviews: @reviews }, status: :ok
+    if params[:user_id].present?
+      @reviews = Review.includes(:user, :beer).where(user_id: params[:user_id])
+    else
+      @reviews = Review.includes(:user, :beer).all
+    end
+
+    render json: {
+      reviews: @reviews.map do |review|
+        {
+          id: review.id,
+          text: review.text,
+          rating: review.rating,
+          user: {
+            id: review.user.id,
+            name: "#{review.user.first_name} #{review.user.last_name}"
+          },
+          beer: {
+            id: review.beer.id,
+            name: review.beer.name
+          },
+          created_at: review.created_at
+        }
+      end
+    }
   end
 
   def show

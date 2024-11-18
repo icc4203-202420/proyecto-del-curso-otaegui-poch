@@ -46,6 +46,8 @@ Rails.application.routes.draw do
       resources :breweries, only: [:show]
       resources :bars_beers, only: [:index, :show, :create, :destroy]
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
+      resources :feeds, only: [:index]
+
     end
   end
 end

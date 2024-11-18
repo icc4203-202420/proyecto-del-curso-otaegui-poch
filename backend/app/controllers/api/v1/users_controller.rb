@@ -78,32 +78,19 @@ end
 
   # Acción para obtener el feed del usuario
   def feed
-    # Obtener el usuario actual
-    user = current_user
-
-    # Obtener las publicaciones de las amistades
-    friendships = user.friends
-
-    # Obtener todas las publicaciones de las amistades, reseñas y fotos de los bares
-    posts = []
-
-    # Obtener publicaciones de las amistades
-    friendships.each do |friend|
-      posts += friend.posts # Suponiendo que existe un método `posts` en el modelo de `Friendship`
-    end
-
-    # Obtener publicaciones de los bares donde el usuario haya escrito algo
-    user.bars.each do |bar|
-      posts += bar.posts
-    end
-
-    # Ordenar las publicaciones por fecha, de la más reciente a la más antigua
-    posts.sort_by!(&:created_at).reverse!
-
-    # Devolver las publicaciones en formato JSON
-    render json: posts, each_serializer: EventPostSerializer
-  end
+    
   
+    friend_ids = current_user.friends.pluck(:id)
+    reviews = Review.where(user_id: [current_user.id, *friend_ids]).order(created_at: :desc)
+    render json: reviews
+  end
+
+  def feed_reviews
+    user = User.find(params[:id])
+    friend_ids = user.friends.pluck(:id) # Asume que el modelo User tiene una relación de amigos
+    reviews = Review.where(user_id: [user.id, *friend_ids]).order(created_at: :desc)
+    render json: reviews
+  end
   
   # GET /api/v1/users/search
   def search

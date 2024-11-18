@@ -1,117 +1,116 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
-import axios from 'axios';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Feed = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [token, setToken] = useState(null);
-  console.log(currentUser);
-  console.log(token, "hola")
+  const [reviews, setReviews] = useState([]);
+  const [error, setError] = useState(null);
 
-  // ID del usuario, este puede venir del estado global o contexto
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const user = await AsyncStorage.getItem('current_user');
-        const authToken = await AsyncStorage.getItem('authToken');
-        setCurrentUser(JSON.parse(user)); // Esto es correcto porque el usuario está en formato JSON
-        setToken(authToken); // No uses JSON.parse porque `authToken` es una cadena
+        if (user) {
+          setCurrentUser(JSON.parse(user)); // Almacena al usuario actual como objeto
+        } else {
+          console.warn('Usuario no encontrado en AsyncStorage');
+        }
       } catch (err) {
         console.error('Error al obtener datos de usuario', err);
       }
     };
-  
+
     fetchUserData();
   }, []);
-  
+
   useEffect(() => {
-    if (currentUser && token) {
-      // Consulta la API para obtener el feed
-      const fetchFeed = async () => {
+    if (currentUser?.id) {
+      const fetchUserReviews = async () => {
         try {
-          const response = await axios.get(`http://192.168.1.101:3000/api/v1/users/${currentUser.id}/feed`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,  // Agregar el token JWT
-            },
-          });
-          setPosts(response.data);  // Asume que la API devuelve un arreglo de publicaciones
-        } catch (err) {
-          setError('Error al obtener las publicaciones');
-          console.error(err);
-        } finally {
-          setLoading(false);
+          const response = await fetch(`http://192.168.1.101:3000/api/v1/reviews?user_id=${currentUser.id}`);
+          if (!response.ok) {
+            throw new Error('Error en la obtención de reseñas');
+          }
+          const data = await response.json();
+          setReviews(data.reviews); // Ajusta según la estructura de tu API
+        } catch (error) {
+          console.error(error);
+          setError(error.message);
         }
       };
 
-      fetchFeed();
+      fetchUserReviews();
     }
-  }, [currentUser, token]); // Dependencias para volver a ejecutar si el usuario o el token cambian
-
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text>{error}</Text>
-      </View>
-    );
-  }
+  }, [currentUser]);
 
   return (
-    <FlatList
-      data={posts}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => (
-        <View style={styles.postCard}>
-          <Text style={styles.postUser}>{item.user_name}</Text>
-          <Text style={styles.postBar}>{item.bar_name}</Text>
-          <Text style={styles.postContent}>{item.content}</Text>
-          <Text style={styles.postDate}>{new Date(item.created_at).toLocaleString()}</Text>
-        </View>
+    <View style={styles.container}>
+      <Text style={styles.header}>Tus Publicaciones</Text>
+      {error && <Text style={styles.errorText}>{error}</Text>}
+      {reviews.length > 0 ? (
+        <FlatList
+          data={reviews}
+          keyExtractor={(review) => review.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.post}>
+              <Text style={styles.postText}>
+                <Text style={styles.boldText}>Usuario:</Text> {item.user.name}
+              </Text>
+              <Text style={styles.postText}>
+                <Text style={styles.boldText}>Cerveza:</Text> {item.beer.name}
+              </Text>
+              <Text style={styles.postText}>
+                <Text style={styles.boldText}>Calificación:</Text> {item.rating}
+              </Text>
+              <Text style={styles.postText}>
+                <Text style={styles.boldText}>Comentario:</Text> {item.text}
+              </Text>
+            </View>
+          )}
+        />
+      ) : (
+        <Text style={styles.noReviewsText}>Aún no has publicado ninguna reseña.</Text>
       )}
-    />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  centered: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
   },
-  postCard: {
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  post: {
+    marginBottom: 16,
     padding: 10,
-    margin: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
   },
-  postUser: {
+  postText: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  boldText: {
     fontWeight: 'bold',
-    fontSize: 16,
   },
-  postBar: {
-    fontSize: 14,
-    color: 'gray',
+  noReviewsText: {
+    fontSize: 18,
+    color: '#555',
+    textAlign: 'center',
+    marginTop: 20,
   },
-  postContent: {
-    marginTop: 5,
-    fontSize: 16,
-  },
-  postDate: {
-    marginTop: 5,
-    fontSize: 12,
-    color: 'gray',
+  errorText: {
+    color: 'red',
+    marginBottom: 8,
   },
 });
 
