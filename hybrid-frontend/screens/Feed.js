@@ -26,27 +26,51 @@ const Feed = () => {
 
   useEffect(() => {
     if (currentUser?.id) {
-      const fetchUserReviews = async () => {
+      const fetchFriendsReviews = async () => {
         try {
-          const response = await fetch(`http://192.168.1.101:3000/api/v1/reviews?user_id=${currentUser.id}`);
+          // Obtener las relaciones de amistad del usuario
+          const response = await fetch(`http://192.168.1.101:3000/api/v1/friendships?user_id=${currentUser.id}`);
           if (!response.ok) {
-            throw new Error('Error en la obtención de reseñas');
+            throw new Error('Error al obtener las relaciones de amistad');
           }
-          const data = await response.json();
-          setReviews(data.reviews); // Ajusta según la estructura de tu API
+          const friendshipsData = await response.json();
+          
+          // Obtener reseñas de los amigos
+          const friendIds = friendshipsData.friendships.map(friend => friend.friend_id);
+          const reviewsPromises = friendIds.map(async (friendId) => {
+            const reviewsResponse = await fetch(`http://192.168.1.101:3000/api/v1/reviews?user_id=${friendId}`);
+            if (!reviewsResponse.ok) {
+              throw new Error(`Error al obtener reseñas del amigo con id ${friendId}`);
+            }
+            return reviewsResponse.json();
+          });
+
+          const reviewsData = await Promise.all(reviewsPromises);
+          const allFriendReviews = reviewsData.flatMap(data => data.reviews);
+
+          // Obtener las reseñas del usuario actual
+          const userReviewsResponse = await fetch(`http://192.168.1.101:3000/api/v1/reviews?user_id=${currentUser.id}`);
+          if (!userReviewsResponse.ok) {
+            throw new Error('Error al obtener las reseñas del usuario actual');
+          }
+          const userReviewsData = await userReviewsResponse.json();
+
+          // Combina las reseñas de los amigos y el usuario actual
+          const allReviews = [...userReviewsData.reviews, ...allFriendReviews];
+          setReviews(allReviews);
         } catch (error) {
           console.error(error);
           setError(error.message);
         }
       };
 
-      fetchUserReviews();
+      fetchFriendsReviews();
     }
   }, [currentUser]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Tus Publicaciones</Text>
+      <Text style={styles.header}>Posts</Text>
       {error && <Text style={styles.errorText}>{error}</Text>}
       {reviews.length > 0 ? (
         <FlatList
@@ -70,7 +94,7 @@ const Feed = () => {
           )}
         />
       ) : (
-        <Text style={styles.noReviewsText}>Aún no has publicado ninguna reseña.</Text>
+        <Text style={styles.noReviewsText}>Aún no tienes reseñas de tus amigos o tuyas.</Text>
       )}
     </View>
   );

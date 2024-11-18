@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       # Rutas para usuarios y sus relaciones
+      resources :friendships, only: [:index]
       resources :users do
         member do
           get 'friendships'
