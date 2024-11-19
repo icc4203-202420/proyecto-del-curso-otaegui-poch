@@ -33,7 +33,7 @@ const UserCard = ({ user }) => {
         }
 
         try {
-            const url = `http://192.168.1.101:3000/api/v1/users/${user.id}/create_friendship`;
+            const url = `http://192.168.1.13:3000/api/v1/users/${user.id}/create_friendship`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
