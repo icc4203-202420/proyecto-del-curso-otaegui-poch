@@ -40,6 +40,7 @@ Rails.application.routes.draw do
         member do
           post 'check_in'
           post 'upload_picture'
+          delete 'delete_picture'
           get 'pictures'
           post 'tag_user'
         end

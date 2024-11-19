@@ -16,19 +16,15 @@ const EventDetail = ({ route }) => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // Función para obtener la lista de amigos desde el backend
     const fetchFriends = async () => {
       try {
         const currentUser = await AsyncStorage.getItem('current_user');
         const parsedUser = JSON.parse(currentUser);
-        console.log(parsedUser)
         const response = await fetch(`http://192.168.1.13:3000/api/v1/users/${parsedUser.id}/friendships`);
         const data = await response.json();
-        console.log(data)
-        
+
         if (response.ok) {
           setFriends(data);
-          setFilteredFriends(data);
         } else {
           Alert.alert('Error', 'No se pudieron cargar los amigos.');
         }
@@ -40,13 +36,13 @@ const EventDetail = ({ route }) => {
     fetchFriends();
   }, []);
 
-  // Filtrar amigos según lo que se escribe en el campo de búsqueda
-  const filteredFriends = searchHandle === ''
-    ? []
-    : friends.filter(friend => friend.handle.toLowerCase().includes(searchHandle.toLowerCase()));
+  const filteredFriends = searchHandle.trim() === ''
+    ? friends.filter(friend => !taggedFriends.includes(friend.id))
+    : friends.filter(friend =>
+        !taggedFriends.includes(friend.id) &&
+        friend.handle.toLowerCase().includes(searchHandle.toLowerCase())
+      );
 
-
-  // Función para elegir la imagen del dispositivo
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -67,7 +63,6 @@ const EventDetail = ({ route }) => {
     }
   };
 
-  // Función para subir la imagen al servidor
   const handleUploadImage = async () => {
     if (!selectedImage) {
       Alert.alert('Error', 'Primero selecciona una imagen.');
@@ -86,7 +81,7 @@ const EventDetail = ({ route }) => {
     });
     formData.append('description', description);
     formData.append('user_id', userId);
-    formData.append('tagged_user_ids', JSON.stringify(taggedFriends)); // Enviar IDs de los amigos etiquetados
+    formData.append('tagged_user_ids', JSON.stringify(taggedFriends));
 
     try {
       const response = await fetch(`http://192.168.1.13:3000/api/v1/events/${event.id}/upload_picture`, {
@@ -112,14 +107,13 @@ const EventDetail = ({ route }) => {
     }
   };
 
-  // Función para el Check-In
   const handleCheckIn = async () => {
     try {
       const response = await fetch(`http://192.168.1.13:3000/api/v1/events/${event.id}/check_in`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${yourJwtToken}`, // Reemplaza con el token de autenticación JWT del usuario
+          Authorization: `Bearer ${yourJwtToken}`,
         },
       });
 
@@ -136,11 +130,9 @@ const EventDetail = ({ route }) => {
   };
 
   const viewImagesBottom = () => {
-    // Navegamos a la pantalla de imágenes del evento con el evento seleccionado
     navigation.navigate('EventImages', { event });
   };
 
-  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{event.name}</Text>
@@ -183,12 +175,26 @@ const EventDetail = ({ route }) => {
                         setTaggedFriends([...taggedFriends, friend.id]);
                       }
                       setSearchHandle('');
-                      setShowFriendsList(false); // Ocultar la lista después de seleccionar un amigo
+                      setShowFriendsList(false);
                     }}
                   >
                     <Text>{friend.handle}</Text>
                   </TouchableOpacity>
                 ))}
+              </View>
+            )}
+
+            {taggedFriends.length > 0 && (
+              <View style={styles.taggedFriendsContainer}>
+                <Text style={styles.subTitle}>Amigos Etiquetados:</Text>
+                {taggedFriends.map(taggedFriendId => {
+                  const taggedFriend = friends.find(friend => friend.id === taggedFriendId);
+                  return (
+                    <View key={taggedFriendId} style={styles.taggedFriendItem}>
+                      <Text style={styles.taggedFriendText}>{taggedFriend?.handle}</Text>
+                    </View>
+                  );
+                })}
               </View>
             )}
 
@@ -202,7 +208,7 @@ const EventDetail = ({ route }) => {
       </View>
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -280,6 +286,26 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
+  taggedFriendsContainer: {
+    width: '90%',
+    marginTop: 20,
+    backgroundColor: '#e6f7ff',
+    borderRadius: 8,
+    padding: 10,
+  },
+  taggedFriendItem: {
+    padding: 10,
+    backgroundColor: '#cceeff',
+    borderRadius: 5,
+    marginVertical: 5,
+  },
+  taggedFriendText: {
+    fontSize: 16,
+    color: '#005f99',
+    fontWeight: 'bold',
+  },
 });
 
 export default EventDetail;
+
+    

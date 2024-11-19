@@ -23,6 +23,7 @@ const UserCard = ({ user }) => {
     }, []);
 
     const handlePress = () => {
+        console.log(user)
         navigation.navigate('UserDetails', { user });
     };
 

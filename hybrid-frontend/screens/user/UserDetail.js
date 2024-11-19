@@ -3,6 +3,8 @@ import { View, Text, Button, Alert, StyleSheet } from 'react-native';
 
 export default function UserDetail({ route }) {
   const { user } = route.params;
+  console.log('hoa')
+  console.log(user)
 
   const handleSendMessage = async () => {
     try {
