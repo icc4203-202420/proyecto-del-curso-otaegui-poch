@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       # Rutas para usuarios y sus relaciones
+      resources :friendships, only: [:index]
       resources :users do
         member do
           get 'friendships'
@@ -49,6 +50,8 @@ Rails.application.routes.draw do
       resources :breweries, only: [:show]
       resources :bars_beers, only: [:index, :show, :create, :destroy]
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
+      resources :feeds, only: [:index]
+
     end
   end
 end
