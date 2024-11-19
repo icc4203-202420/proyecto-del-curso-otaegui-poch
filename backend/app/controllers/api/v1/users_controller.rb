@@ -66,14 +66,18 @@ class API::V1::UsersController < ApplicationController
   
 
     # Eliminar una amistad
-  def destroy_friendship
-    friend = User.find(params[:friend_id])
-    if current_user.friends.destroy(friend)
-      render json: { message: "Amistad eliminada exitosamente" }, status: :ok
-    else
-      render json: { error: "No se pudo eliminar la amistad" }, status: :unprocessable_entity
+    def destroy_friendship
+      # Encontrar al usuario que solicita eliminar la amistad
+      user = User.find(params[:id])
+      friend = User.find(params[:friend_id])
+  
+      # Eliminar la amistad de ambos usuarios (si existe)
+      if user.friends.delete(friend) && friend.friends.delete(user)
+        render json: { message: 'Amistad eliminada correctamente' }, status: :ok
+      else
+        render json: { error: 'No se pudo eliminar la amistad' }, status: :unprocessable_entity
+      end
     end
-  end
 
   # Acción para obtener el feed del usuario
   def feed

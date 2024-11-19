@@ -144,6 +144,8 @@ const EventDetail = ({ route }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{event.name}</Text>
+      console.log(event);
+
       <Text style={styles.date}>Fecha: {new Date(event.date).toLocaleDateString()}</Text>
       <Button title="Check In" onPress={handleCheckIn} color="#007AFF" />
 

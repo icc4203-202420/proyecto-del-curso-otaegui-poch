@@ -8,6 +8,10 @@ class ApplicationController < ActionController::API
     devise_parameter_sanitizer.permit(:account_update, keys: %i[name avatar])
   end
 
+  def current_user
+    # Decodificar el token y obtener el ID del usuario
+    @current_user ||= User.find(decoded_token['user_id']) if decoded_token
+  end
   def authenticate_user!
     token = request.headers['Authorization']&.split(' ')&.last
     decoded = decode_token(token)

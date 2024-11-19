@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserCard = ({ user }) => {
-    const [currentUser, setCurrentUser] = useState(null); // Agregar estado para el usuario actual
+    const [currentUser, setCurrentUser] = useState(null);
     const [isFriend, setIsFriend] = useState(false);
     const navigation = useNavigation();
 
@@ -12,15 +12,18 @@ const UserCard = ({ user }) => {
         const fetchUserData = async () => {
             try {
                 const user = await AsyncStorage.getItem('current_user');
-                const authToken = await AsyncStorage.getItem('authToken');
                 setCurrentUser(JSON.parse(user)); // Esto es correcto porque el usuario está en formato JSON
-                // Si necesitas el authToken puedes también guardarlo, pero no es necesario para esta parte
+
+                // Verifica si el usuario actual es amigo de este usuario
+                if (user && user.friends && user.friends.some(friend => friend.id === user.id)) {
+                    setIsFriend(true);
+                }
             } catch (err) {
                 console.error('Error al obtener datos de usuario', err);
             }
         };
         fetchUserData();
-    }, []);
+    }, [user]); // Dependencia en `user` para asegurarse de verificar la amistad cada vez que cambie
 
     const handlePress = () => {
         navigation.navigate('UserDetails', { user });
@@ -58,6 +61,38 @@ const UserCard = ({ user }) => {
         }
     };
 
+    const handleUnfriend = async () => {
+        if (!currentUser) {
+            Alert.alert("Error", "No se pudo obtener los datos del usuario actual.");
+            return;
+        }
+    
+        try {
+            const authToken = await AsyncStorage.getItem('authToken'); // Obtener el token almacenado
+            const url = `http://192.168.1.101:3000/api/v1/users/${user.id}/destroy_friendship?friend_id=${currentUser.id}`;
+    
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`, // Agregar el token a la cabecera
+                }
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                setIsFriend(false);
+                Alert.alert("Éxito", "Amistad eliminada");
+            } else {
+                Alert.alert("Error", data.error || "No se pudo eliminar la amistad");
+            }
+        } catch (error) {
+            console.error('Error removing friend:', error);
+            Alert.alert("Error", "Error de conexión. Inténtalo de nuevo más tarde.");
+        }
+    };
+
     return (
         <View style={styles.card}>
             <Image
@@ -78,6 +113,15 @@ const UserCard = ({ user }) => {
                         <Text style={styles.buttonText}>
                             {isFriend ? '✓ Amigos' : '+ Agregar'}
                         </Text>
+                    </TouchableOpacity>
+                )}
+
+                {currentUser && currentUser.id !== user.id && isFriend && (
+                    <TouchableOpacity 
+                        style={[styles.button, styles.unfriendButton]} 
+                        onPress={handleUnfriend}
+                    >
+                        <Text style={styles.buttonText}>Eliminar Amigo</Text>
                     </TouchableOpacity>
                 )}
                 
@@ -142,6 +186,9 @@ const styles = StyleSheet.create({
     },
     friendButtonActive: {
         backgroundColor: '#28a745',
+    },
+    unfriendButton: {
+        backgroundColor: '#dc3545',
     },
     detailsButton: {
         backgroundColor: '#6c757d',
