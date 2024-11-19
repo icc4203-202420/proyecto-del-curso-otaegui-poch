@@ -30,6 +30,9 @@ Rails.application.routes.draw do
       # El resto de tus rutas...
       resources :bars, only: [:index, :show, :create, :update, :destroy]
       resources :events, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          post 'upload_picture'
+        end
         collection do
           get 'feed'
         end

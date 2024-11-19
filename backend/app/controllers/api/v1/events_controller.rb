@@ -93,7 +93,7 @@ module API
         end
 
         # cambiar por el id del usuario actual Importante
-        user_id = 1
+        user_id = params[:user_id]
 
         # Verificar que el user_id esté presente
         if user_id.blank?
@@ -108,45 +108,56 @@ module API
           return
         end
 
-        # Crear la carpeta si no existe
-        directory = Rails.root.join('public', 'seeds', 'images')
-        FileUtils.mkdir_p(directory) unless File.directory?(directory)
-
-        # Obtener el nombre original del archivo
-        original_filename = params[:image].original_filename
-        filepath = directory.join(original_filename)
-
-        # Guardar la imagen en el sistema de archivos
-        File.open(filepath, 'wb') do |file|
-          file.write(params[:image].read)
-        end
 
         # Crear una nueva instancia de EventPicture
         picture = @event.event_pictures.new(
           user_id: user.id,
-          description: params[:description],
-          pictures_url: ["/seeds/images/#{original_filename}"]
+          description: params[:description]
         )
 
+        # Adjuntar la imagen utilizando ActiveStorage
+        if params[:image].present?
+          picture.image.attach(params[:image])
+        else
+          render json: { error: 'Imagen no proporcionada' }, status: :bad_request
+          puts 'Imagen no proporcionada'
+          return
+        end
+
         if picture.save
-          render json: { success: 'Imagen subida con éxito', url: picture.pictures_url }, status: :ok
+          # Generar y guardar la URL de la imagen
+          picture.update(pictures_url: url_for(picture.image))
+          render json: { success: 'Imagen subida con éxito', url: url_for(picture.image) }, status: :created
         else
           render json: { error: 'Error al guardar la imagen', messages: picture.errors.full_messages }, status: :unprocessable_entity
         end
       end
 
-
       def pictures
         @event_pictures = EventPicture.where(event_id: params[:id])
+        puts @event_pictures # Verificación de los registros recuperados
+        puts 'hola'
+      
+        # Si no hay imágenes, devolver un arreglo vacío
+        if @event_pictures.blank?
+          render json: []
+          return
+        end
+      
         pictures_with_url = @event_pictures.map do |pic|
+          # Asegurarse de que pictures_url siempre sea un array
+          urls = pic.pictures_url.is_a?(String) ? [pic.pictures_url] : pic.pictures_url
+      
           {
             id: pic.id,
             description: pic.description,
-            pictures_url: pic.pictures_url.map { |url| "#{request.base_url}/#{url}" } # Generar URLs absolutas
+            pictures_url: urls.map { |url| url.start_with?('http') ? url : "#{request.base_url}#{url}" } # Generar URLs absolutas
           }
         end
+      
         render json: pictures_with_url
       end
+      
 
 
           # POST /api/v1/event_pictures/:id/tag_user

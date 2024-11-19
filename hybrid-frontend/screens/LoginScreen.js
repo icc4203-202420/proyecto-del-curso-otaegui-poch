@@ -10,7 +10,7 @@ export default function LoginScreen() {
   const navigation = useNavigation();
 
   const handleLogin = () => {
-    fetch('http://192.168.1.101:3000/api/v1/login', {
+    fetch('http://192.168.1.13:3000/api/v1/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -32,20 +32,42 @@ export default function LoginScreen() {
         if (success && token) {
           // Guardar el token (usando AsyncStorage o SecureStore)
           const storeToken = async (token) => {
-            await AsyncStorage.setItem('authToken', token);
-          
-            // Espera a que se haya almacenado el valor
-            const storedToken = await AsyncStorage.getItem('authToken');
+            try {
+              await AsyncStorage.setItem('authToken', token);
+              console.log('Token almacenado:', token); // Muestra el token almacenado
+        
+              // Espera a que se haya almacenado el valor y luego lo recupera
+              const storedToken = await AsyncStorage.getItem('authToken');
+              console.log('Token recuperado de AsyncStorage:', storedToken); // Muestra el token recuperado para verificar
+            } catch (error) {
+              console.error('Error al almacenar o recuperar el token:', error);
+            }
           };
-          
+        
           storeToken(token);
+        
+          // Guardar la información del usuario
+          const storeCurrentUser = async (user) => {
+            try {
+              const currentUser = {
+                email: user.email,
+                first_name: user.first_name,
+                id: user.id,
+                last_name: user.last_name,
+              };
+        
+              await AsyncStorage.setItem('current_user', JSON.stringify(currentUser));
+              console.log('Usuario almacenado:', currentUser); // Muestra el objeto usuario almacenado
+        
+              // Recuperar y mostrar el usuario guardado para asegurarse de que se almacenó correctamente
+              const storedUser = await AsyncStorage.getItem('current_user');
+              console.log('Usuario recuperado de AsyncStorage:', JSON.parse(storedUser));
+            } catch (error) {
+              console.error('Error al almacenar o recuperar el usuario:', error);
+            }
+          };
 
-          AsyncStorage.setItem('current_user', JSON.stringify({
-            email: user.email,
-            first_name: user.first_name,
-            id: user.id,
-            last_name: user.last_name
-          })); 
+          storeCurrentUser(user);
           
           Alert.alert('Éxito', 'Inicio de sesión exitoso');
           setTimeout(() => {
@@ -53,12 +75,12 @@ export default function LoginScreen() {
           }, 2000); // Espera 2 segundos antes de navegar
         } else {
           setErrorMessage(data.status?.message || 'Error en el inicio de sesión');
-          Alert.alert('Error muy feo', data.status?.message || 'Error en el inicio de sesión');
+          Alert.alert('Error', data.status?.message || 'Error en el inicio de sesión');
         }
       })
       .catch((error) => {
         setErrorMessage(error.message || 'Ocurrió un error durante el inicio de sesión');
-        Alert.alert('Error hola', error.message || 'Ocurrió un error durante el inicio de sesión');
+        Alert.alert('Error', error.message || 'Ocurrió un error durante el inicio de sesión');
         console.log(error.message)
       });
   };

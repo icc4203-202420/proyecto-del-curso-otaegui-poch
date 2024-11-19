@@ -33,7 +33,7 @@ const Feed = () => {
       // Consulta la API para obtener el feed
       const fetchFeed = async () => {
         try {
-          const response = await axios.get(`http://192.168.1.101:3000/api/v1/users/${currentUser.id}/feed`, {
+          const response = await axios.get(`http://192.168.1.13:3000/api/v1/users/${currentUser.id}/feed`, {
             headers: {
               'Authorization': `Bearer ${token}`,  // Agregar el token JWT
             },

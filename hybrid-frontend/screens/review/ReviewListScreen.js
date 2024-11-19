@@ -10,7 +10,7 @@ const ReviewListScreen = ({ route }) => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch(`http://192.168.1.101:3000/api/v1/reviews?beer_id=${beerId}`);
+        const response = await fetch(`http://192.168.1.13:3000/api/v1/reviews?beer_id=${beerId}`);
         if (!response.ok) {
           throw new Error('Error en la obtención de reseñas'); // Maneja errores de la respuesta
         }
@@ -29,7 +29,7 @@ const ReviewListScreen = ({ route }) => {
     const fetchUsers = async (userIds) => {
       try {
         const userResponses = await Promise.all(userIds.map(userId =>
-          fetch(`http://192.168.1.101:3000/api/v1/users/${userId}`) // Asegúrate de que esta ruta exista
+          fetch(`http://192.168.1.13:3000/api/v1/users/${userId}`) // Asegúrate de que esta ruta exista
         ));
 
         const userData = await Promise.all(userResponses.map(res => res.json()));

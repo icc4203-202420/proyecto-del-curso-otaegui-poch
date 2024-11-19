@@ -27,7 +27,7 @@ export default function SignUpScreen() {
 
     const { email, first_name, last_name, handle, password } = formData;
 
-    fetch('http://192.168.1.101:3000/api/v1/signup', {
+    fetch('http://192.168.1.13:3000/api/v1/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
