@@ -12,7 +12,7 @@ const EventImagesScreen = ({ route }) => {
     // Función para obtener las imágenes del evento desde el servidor
     const fetchEventImages = async () => {
       try {
-        const response = await fetch(`http://192.168.1.13:3000/api/v1/events/${event.id}/pictures`);
+        const response = await fetch(`http://192.168.1.101:3000/api/v1/events/${event.id}/pictures`);
         const data = await response.json();
 
         if (response.ok) {

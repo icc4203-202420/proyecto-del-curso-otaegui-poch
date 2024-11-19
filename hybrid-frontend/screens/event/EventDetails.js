@@ -70,7 +70,7 @@ const EventDetail = ({ route }) => {
     console.log('FormData antes de enviar:', formData); // Verifica el contenido del FormData antes de enviarlo
 
     try {
-      const response = await fetch(`http://192.168.1.13:3000/api/v1/events/${event.id}/upload_picture`, {
+      const response = await fetch(`http://192.168.1.101:3000/api/v1/events/${event.id}/upload_picture`, {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -100,7 +100,7 @@ const EventDetail = ({ route }) => {
   // Función para el Check-In
   const handleCheckIn = async () => {
     try {
-      const response = await fetch(`http://192.168.1.13:3000/api/v1/events/${event.id}/check_in`, {
+      const response = await fetch(`http://192.168.1.101:3000/api/v1/events/${event.id}/check_in`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

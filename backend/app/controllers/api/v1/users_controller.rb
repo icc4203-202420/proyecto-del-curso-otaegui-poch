@@ -106,6 +106,14 @@ end
     end
   end
 
+  def pictures
+    user = User.find(params[:id])
+    pictures = user.event_pictures # Cambia esto según la asociación en tu modelo
+    render json: pictures
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Usuario no encontrado' }, status: :not_found
+  end
+
   private
   def authenticate_user!
     token = request.headers['Authorization']&.split(' ')&.last

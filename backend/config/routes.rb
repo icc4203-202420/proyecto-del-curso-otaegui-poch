@@ -24,6 +24,7 @@ Rails.application.routes.draw do
           post 'create_friendship'  # Cambiado para coincidir con el endpoint
           delete 'destroy_friendship'
           get 'feed'
+          get 'pictures'
         end
         resources :reviews, only: [:index]
       end
@@ -31,9 +32,12 @@ Rails.application.routes.draw do
       # El resto de tus rutas...
       resources :bars, only: [:index, :show, :create, :update, :destroy]
       resources :events, only: [:index, :show, :create, :update, :destroy] do
+        # Ruta para obtener las imágenes de un usuario en cualquier evento
+        get 'pictures_by_user/:user_id', to: 'events#pictures_by_user', on: :collection
         member do
           post 'upload_picture'
         end
+      
         collection do
           get 'feed'
         end
