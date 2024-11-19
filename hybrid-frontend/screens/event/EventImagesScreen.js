@@ -1,34 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Image, ActivityIndicator, Alert, TouchableOpacity, Modal, Button } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, StyleSheet, Image, ActivityIndicator, Alert, TouchableOpacity, Modal, Button, ScrollView } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const EventImagesScreen = ({ route }) => {
-  const { event } = route.params; // Se obtiene el evento desde la navegación
+  const { event } = route.params;
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(null); // Estado para la imagen seleccionada
-  const [modalVisible, setModalVisible] = useState(false); // Estado para controlar la visibilidad del modal
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const navigation = useNavigation();
 
-  useEffect(() => {
-    // Función para obtener las imágenes del evento desde el servidor
-    const fetchEventImages = async () => {
-      try {
-        const response = await fetch(`http://192.168.1.101:3000/api/v1/events/${event.id}/pictures`);
-        const data = await response.json();
-
-        if (response.ok) {
-          setImages(data);
-        } else {
-          Alert.alert("Error", "No se pudieron cargar las imágenes del evento.");
+  // Obtener el usuario actual una vez al montar
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchCurrentUser = async () => {
+        try {
+          const currentUser = await AsyncStorage.getItem('current_user');
+          const parsedUser = JSON.parse(currentUser);
+          setCurrentUserId(parsedUser.id);
+        } catch (error) {
+          console.error('Error al obtener el ID del usuario actual:', error);
         }
-      } catch (error) {
-        Alert.alert("Error", "No se pudo conectar con el servidor.");
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
-    fetchEventImages();
-  }, [event.id]);
+      const fetchEventImages = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch(`http://192.168.1.13:3000/api/v1/events/${event.id}/pictures`);
+          const data = await response.json();
+
+          if (response.ok) {
+            setImages(data);
+          } else {
+            Alert.alert("Error", "No se pudieron cargar las imágenes del evento.");
+          }
+        } catch (error) {
+          Alert.alert("Error", "No se pudo conectar con el servidor.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchCurrentUser();
+      fetchEventImages();
+    }, [event.id])
+  );
+
+  const handleDeleteImage = async (imageId) => {
+    try {
+      const response = await fetch(`http://192.168.1.13:3000/api/v1/events/${event.id}/pictures/${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: currentUserId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Éxito', data.success || 'Imagen eliminada exitosamente.');
+        setImages(images.filter((img) => img.id !== imageId));
+      } else {
+        Alert.alert('Error', data.error || 'No se pudo eliminar la imagen.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.');
+    }
+  };
+
+  const handleImagePress = (img) => {
+    setSelectedImage(img);
+    setModalVisible(true);
+  };
+
+  const handleUserPress = (user) => {
+    navigation.navigate('UserDetails', { user });
+  };
+
+  const renderImageItem = ({ item, index }) => (
+    <View style={styles.imageItemContainer} key={index}>
+      <TouchableOpacity onPress={() => handleImagePress(item)}>
+        <Image source={{ uri: item.pictures_url[0] }} style={styles.imageThumbnail} />
+      </TouchableOpacity>
+    </View>
+  );
 
   if (loading) {
     return (
@@ -37,19 +96,6 @@ const EventImagesScreen = ({ route }) => {
       </View>
     );
   }
-
-  // Función para manejar la selección de una imagen
-  const handleImagePress = (img) => {
-    setSelectedImage(img);
-    setModalVisible(true);
-  };
-
-  // Renderizar cada elemento de la lista de imágenes
-  const renderImageItem = ({ item, index }) => (
-    <TouchableOpacity key={index} onPress={() => handleImagePress(item)}>
-      <Image source={{ uri: item.pictures_url[0] }} style={styles.imageThumbnail} />
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.container}>
@@ -61,21 +107,43 @@ const EventImagesScreen = ({ route }) => {
           data={images}
           renderItem={renderImageItem}
           keyExtractor={(item, index) => index.toString()}
-          numColumns={2} // Mostrar las imágenes en 2 columnas
+          numColumns={2}
           contentContainerStyle={styles.imageList}
         />
       )}
 
-      {/* Modal para mostrar la imagen ampliada */}
       {selectedImage && (
         <Modal visible={modalVisible} transparent={true} animationType="slide">
-          <View style={styles.modalContainer}>
+          <ScrollView contentContainerStyle={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Image source={{ uri: selectedImage.pictures_url[0] }} style={styles.modalImage} />
               <Text style={styles.description}>{selectedImage.description}</Text>
+
+              {selectedImage.users_tagged && selectedImage.users_tagged.length > 0 ? (
+                <View style={styles.taggedUsersContainer}>
+                  <Text style={styles.taggedTitle}>Usuarios Etiquetados:</Text>
+                  {selectedImage.users_tagged.map((user, index) => (
+                    <TouchableOpacity 
+                      key={index}
+                      onPress={() => handleUserPress(user)} 
+                      style={styles.taggedUser}
+                    >
+                      <Text style={styles.taggedUserName}>{user.handle || `Usuario ${user.id}`}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.noTaggedUsersText}>No hay usuarios etiquetados.</Text>
+              )}
+
+              {selectedImage.user_id === currentUserId && (
+                <TouchableOpacity onPress={() => handleDeleteImage(selectedImage.id)} style={styles.deleteButtonModal}>
+                  <FontAwesome name="trash" size={24} color="red" />
+                </TouchableOpacity>
+              )}
               <Button title="Cerrar" onPress={() => setModalVisible(false)} />
             </View>
-          </View>
+          </ScrollView>
         </Modal>
       )}
     </View>
@@ -100,10 +168,13 @@ const styles = StyleSheet.create({
   imageList: {
     alignItems: 'center',
   },
+  imageItemContainer: {
+    position: 'relative',
+    margin: 5,
+  },
   imageThumbnail: {
     width: 150,
     height: 100,
-    margin: 5,
     borderRadius: 8,
   },
   loadingContainer: {
@@ -112,7 +183,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -133,6 +204,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginBottom: 10,
+  },
+  taggedUsersContainer: {
+    marginVertical: 10,
+    width: '100%',
+  },
+  taggedTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#007AFF',
+  },
+  taggedUser: {
+    marginBottom: 5,
+    padding: 10,
+    backgroundColor: '#f0f8ff',
+    borderRadius: 5,
+    width: '100%',
+  },
+  taggedUserName: {
+    fontSize: 16,
+    color: '#005f99',
+  },
+  noTaggedUsersText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 10,
+  },
+  deleteButtonModal: {
+    marginTop: 10,
+    alignItems: 'center',
   },
 });
 

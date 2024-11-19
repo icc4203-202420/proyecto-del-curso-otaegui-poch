@@ -26,6 +26,7 @@ const UserCard = ({ user }) => {
     }, [user]); // Dependencia en `user` para asegurarse de verificar la amistad cada vez que cambie
 
     const handlePress = () => {
+        console.log(user)
         navigation.navigate('UserDetails', { user });
     };
 

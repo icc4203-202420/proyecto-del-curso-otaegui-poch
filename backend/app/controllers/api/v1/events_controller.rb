@@ -143,7 +143,6 @@ module API
       def pictures
         @event_pictures = EventPicture.where(event_id: params[:id])
         puts @event_pictures # Verificación de los registros recuperados
-        puts 'hola'
       
         # Si no hay imágenes, devolver un arreglo vacío
         if @event_pictures.blank?
@@ -158,35 +157,49 @@ module API
           {
             id: pic.id,
             description: pic.description,
-            pictures_url: urls.map { |url| url.start_with?('http') ? url : "#{request.base_url}#{url}" } # Generar URLs absolutas
+            pictures_url: urls.map { |url| url.start_with?('http') ? url : "#{request.base_url}#{url}" }, # Generar URLs absolutas
+            users_tagged: users_tagged(pic)
           }
         end
       
         render json: pictures_with_url
       end
       
-
-
-          # POST /api/v1/event_pictures/:id/tag_user
-      def tag_user
-        @event_picture = EventPicture.find_by(id: params[:picture_id])
-
-        if @event_picture.nil?
-          return render json: { error: "Event picture not found" }, status: :not_found
+      def delete_picture
+        @event = Event.find(params[:event_id])
+        picture = @event.event_pictures.find_by(id: params[:id])
+      
+        if picture.nil?
+          render json: { error: 'Imagen no encontrada' }, status: :not_found
+          return
+        end
+      
+        # Asegurarse de que el usuario actual es el propietario de la imagen
+        user_id = params[:user_id]
+        if picture.user_id != user_id
+          render json: { error: 'No autorizado para eliminar esta imagen' }, status: :unauthorized
+          return
         end
 
-        user_id = params[:user_id]
+        # Eliminar la imagen
+        picture.destroy
+        render json: { success: 'Imagen eliminada con éxito' }, status: :ok
+      end
 
-        # Inicializa el array de usuarios si es nulo
-        @event_picture.users_tagged ||= []
 
-        # Agrega el user_id al array de usuarios etiquetados
-        @event_picture.users_tagged << user_id
-
-        if @event_picture.save
-          render json: @event_picture, status: :ok
+      def users_tagged(event_pictures)
+        puts event_pictures.description
+      
+        # Asegúrate de que users_tagged sea un array
+        users_tagged_ids = event_pictures.users_tagged.is_a?(String) ? JSON.parse(event_pictures.users_tagged) : event_pictures.users_tagged
+      
+        if users_tagged_ids.present?
+          users_tagged_ids.map do |user_id|
+            user = User.find(user_id)
+            user.as_json
+          end
         else
-          render json: @event_picture.errors, status: :unprocessable_entity
+          [] # Retorna un array vacío si no hay usuarios etiquetados
         end
       end
       
