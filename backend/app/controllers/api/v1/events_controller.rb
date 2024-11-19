@@ -124,6 +124,13 @@ module API
           return
         end
 
+        # Agregar lógica para etiquetar amigos
+        tagged_user_ids = params[:tagged_user_ids]
+        if tagged_user_ids.present?
+          # Almacenar los IDs de los usuarios etiquetados en el campo `users_tagged` del modelo `EventPicture`
+          picture.users_tagged = tagged_user_ids
+        end
+
         if picture.save
           # Generar y guardar la URL de la imagen
           picture.update(pictures_url: url_for(picture.image))
