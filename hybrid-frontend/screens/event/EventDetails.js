@@ -22,7 +22,7 @@ const EventDetail = ({ route }) => {
         const currentUser = await AsyncStorage.getItem('current_user');
         const parsedUser = JSON.parse(currentUser);
         console.log(parsedUser)
-        const response = await fetch(`http://192.168.1.13:3000/api/v1/users/${parsedUser.id}/friendships`);
+        const response = await fetch(`http://192.168.1.101:3000/api/v1/users/${parsedUser.id}/friendships`);
         const data = await response.json();
         console.log(data)
         

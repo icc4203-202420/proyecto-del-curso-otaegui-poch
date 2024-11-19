@@ -193,13 +193,13 @@ module API
       def pictures_by_user
         user = User.find(params[:user_id])
         pictures = EventPicture.where(user_id: user.id)
-      
+        
         # Si no hay imágenes, devolver un arreglo vacío
         if pictures.blank?
           render json: []
           return
         end
-      
+        
         pictures_with_url = pictures.map do |pic|
           # Asegurarse de que pictures_url siempre sea un array
           urls = pic.pictures_url.is_a?(String) ? [pic.pictures_url] : pic.pictures_url
@@ -207,10 +207,11 @@ module API
           {
             id: pic.id,
             description: pic.description,
-            pictures_url: urls.map { |url| url.start_with?('http') ? url : "#{request.base_url}#{url}" } # Generar URLs absolutas
+            pictures_url: urls.map { |url| url.start_with?('http') ? url : "#{request.base_url}#{url}" }, # Generar URLs absolutas
+            user_first_name: user.first_name # Agregar el primer nombre del usuario
           }
         end
-      
+        
         render json: pictures_with_url
       end
       private

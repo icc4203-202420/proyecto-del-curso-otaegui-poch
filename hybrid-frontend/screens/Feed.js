@@ -84,6 +84,7 @@ const Feed = ({ navigation }) => {
                   created_at: picture.created_at,
                   event_id: picture.event_id,
                   type: 'photo',
+                  name: picture.user_first_name,
                 }))
               );
 
