@@ -9,11 +9,11 @@ const BeerDetailsScreen = ({ route, navigation }) => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.1.100:3000/api/v1/brands/${beer.brand_id}`);
+        const response = await fetch(`http://192.168.1.101:3000/api/v1/brands/${beer.brand_id}`);
         const brandData = await response.json();
 
         if (brandData && brandData.brewery_id) {
-          const breweryResponse = await fetch(`http://192.168.1.100:3000/api/v1/breweries/${brandData.brewery_id}`);
+          const breweryResponse = await fetch(`http://192.168.1.101:3000/api/v1/breweries/${brandData.brewery_id}`);
           const breweryData = await breweryResponse.json();
           setBrewery(breweryData);
         }
