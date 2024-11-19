@@ -1,42 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Alert, StyleSheet, Image, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FontAwesome } from '@expo/vector-icons'; // Importar iconos de FontAwesome
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 const EventDetail = ({ route }) => {
   const { event } = route.params;
   const [selectedImage, setSelectedImage] = useState(null);
   const [description, setDescription] = useState('');
+  const [friends, setFriends] = useState([]);
+  const [taggedFriends, setTaggedFriends] = useState([]);
+  const [searchHandle, setSearchHandle] = useState('');
+  const [showFriendsList, setShowFriendsList] = useState(false);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    // Función para obtener la lista de amigos desde el backend
+    const fetchFriends = async () => {
+      try {
+        const currentUser = await AsyncStorage.getItem('current_user');
+        const parsedUser = JSON.parse(currentUser);
+        console.log(parsedUser)
+        const response = await fetch(`http://192.168.1.13:3000/api/v1/users/${parsedUser.id}/friendships`);
+        const data = await response.json();
+        console.log(data)
+        
+        if (response.ok) {
+          setFriends(data);
+          setFilteredFriends(data);
+        } else {
+          Alert.alert('Error', 'No se pudieron cargar los amigos.');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'No se pudo conectar con el servidor.');
+      }
+    };
+
+    fetchFriends();
+  }, []);
+
+  // Filtrar amigos según lo que se escribe en el campo de búsqueda
+  const filteredFriends = searchHandle === ''
+    ? []
+    : friends.filter(friend => friend.handle.toLowerCase().includes(searchHandle.toLowerCase()));
+
 
   // Función para elegir la imagen del dispositivo
   const handlePickImage = async () => {
-    // Solicita permisos para acceder a la galería
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    // Verifica si el permiso fue concedido
     if (status !== 'granted') {
       Alert.alert('Permiso denegado', 'Se requiere permiso para acceder a la galería de fotos.');
       return;
     }
 
-    // Si el permiso fue concedido, abre la galería de fotos
     let response = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-    console.log(response);
 
     if (!response.canceled && response.assets && response.assets.length > 0) {
       const uri = response.assets[0].uri;
-
-      // Verificar si la URI está disponible
-      console.log('Imagen seleccionada URI:', uri);
-
       setSelectedImage(uri);
     }
   };
@@ -48,15 +74,9 @@ const EventDetail = ({ route }) => {
       return;
     }
 
-    // Obtener el usuario actual del AsyncStorage
     const currentUser = await AsyncStorage.getItem('current_user');
     const parsedUser = JSON.parse(currentUser);
     const userId = parsedUser.id;
-
-    console.log('Usuario actual:', parsedUser); // Verifica si se obtiene correctamente el usuario
-    console.log('ID del usuario:', userId); // Verifica si se obtiene correctamente el ID del usuario
-    console.log('ID del evento:', event.id);
-    console.log(selectedImage);
 
     const formData = new FormData();
     formData.append('image', {
@@ -65,9 +85,8 @@ const EventDetail = ({ route }) => {
       type: 'image/jpeg',
     });
     formData.append('description', description);
-    formData.append('user_id', userId); // Agregar el ID del usuario actual desde el AsyncStorage
-
-    console.log('FormData antes de enviar:', formData); // Verifica el contenido del FormData antes de enviarlo
+    formData.append('user_id', userId);
+    formData.append('tagged_user_ids', JSON.stringify(taggedFriends)); // Enviar IDs de los amigos etiquetados
 
     try {
       const response = await fetch(`http://192.168.1.13:3000/api/v1/events/${event.id}/upload_picture`, {
@@ -78,21 +97,17 @@ const EventDetail = ({ route }) => {
         body: formData,
       });
 
-      console.log('Respuesta del servidor:', response); // Verifica el objeto de respuesta del servidor
-
       const data = await response.json();
-
-      console.log('Datos de respuesta:', data); // Verifica los datos de la respuesta
 
       if (response.ok) {
         Alert.alert('Éxito', data.success || 'Imagen subida exitosamente.');
-        setSelectedImage(null); // Limpia la imagen seleccionada después de subirla
+        setSelectedImage(null);
         setDescription('');
+        setTaggedFriends([]);
       } else {
         Alert.alert('Error', data.error || 'Error al subir la imagen.');
       }
     } catch (error) {
-      console.log('Error durante la subida:', error); // Verifica si hay algún error durante la subida
       Alert.alert('Error', 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.');
     }
   };
@@ -111,12 +126,12 @@ const EventDetail = ({ route }) => {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert('Check In', data.message || 'Check-in realizado exitosamente.');
+        Alert.alert("Check In", data.message || "Check-in realizado exitosamente.");
       } else {
-        Alert.alert('Error', data.errors ? data.errors.join(', ') : 'Error al realizar el check-in.');
+        Alert.alert("Error", data.errors ? data.errors.join(", ") : "Error al realizar el check-in.");
       }
     } catch (error) {
-      Alert.alert('Error', 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.');
+      Alert.alert("Error", "No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.");
     }
   };
 
@@ -125,6 +140,7 @@ const EventDetail = ({ route }) => {
     navigation.navigate('EventImages', { event });
   };
 
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{event.name}</Text>
@@ -146,6 +162,36 @@ const EventDetail = ({ route }) => {
               value={description}
               onChangeText={(text) => setDescription(text)}
             />
+
+            <Text style={styles.subTitle}>Etiquetar Amigos:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Buscar amigos por handle"
+              value={searchHandle}
+              onFocus={() => setShowFriendsList(true)}
+              onChangeText={(text) => setSearchHandle(text)}
+            />
+
+            {showFriendsList && filteredFriends.length > 0 && (
+              <View style={styles.friendsListContainer}>
+                {filteredFriends.map((friend) => (
+                  <TouchableOpacity
+                    key={friend.id}
+                    style={styles.friendItem}
+                    onPress={() => {
+                      if (!taggedFriends.includes(friend.id)) {
+                        setTaggedFriends([...taggedFriends, friend.id]);
+                      }
+                      setSearchHandle('');
+                      setShowFriendsList(false); // Ocultar la lista después de seleccionar un amigo
+                    }}
+                  >
+                    <Text>{friend.handle}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
             <Button title="Subir Imagen" onPress={handleUploadImage} color="#007AFF" />
           </View>
         )}
@@ -212,6 +258,27 @@ const styles = StyleSheet.create({
     width: '90%',
     padding: 10,
     marginVertical: 10,
+  },
+  subTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  friendsListContainer: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    maxHeight: 150,
+    marginBottom: 10,
+  },
+  friendItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
 });
 

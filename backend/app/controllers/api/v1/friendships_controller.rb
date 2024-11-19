@@ -14,7 +14,7 @@ class API::V1::FriendshipsController  < ApplicationController
   
           render json: { friendships: friends }
         end
-      end
+end
     
 
   

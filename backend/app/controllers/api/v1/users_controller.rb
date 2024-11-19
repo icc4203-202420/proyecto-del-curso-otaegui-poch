@@ -29,8 +29,7 @@ class API::V1::UsersController < ApplicationController
 
   # GET /api/v1/users/:id/friendships
   def friendships
-    user_id = decoded_token[:user_id]  # Este es el ID del usuario cuyo amistades queremos obtener
-    friendships = Friendship.where(user_id: user_id)  # Busca todas las amistades del usuario
+    friendships = Friendship.where(user_id: params[:id])  # Busca todas las amistades del usuario
 
     # Extrae los IDs de los amigos
     friend_ids = friendships.pluck(:friend_id)
@@ -62,7 +61,7 @@ class API::V1::UsersController < ApplicationController
     else
         render json: { error: 'No se pudo crear la amistad' }, status: :unprocessable_entity
     end
-end
+  end
   
   
 
