@@ -10,7 +10,7 @@ const BeerList = () => {
   useEffect(() => {
     const fetchBeers = async () => {
       try {
-        const response = await axios.get('http://192.168.1.13:3000/api/v1/beers');
+        const response = await axios.get('http://192.168.1.101:3000/api/v1/beers');
         console.log('API Response:', response.data); // Verificar la respuesta del API
         setBeers(response.data.beers);
       } catch (error) {

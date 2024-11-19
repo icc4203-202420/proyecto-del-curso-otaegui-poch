@@ -8,7 +8,7 @@ export default function UserDetail({ route }) {
 
   const handleSendMessage = async () => {
     try {
-      const response = await fetch(`http://192.168.1.13:3000/api/v1/users/${user.id}/send_message`, {
+      const response = await fetch(`http://192.168.1.101:3000/api/v1/users/${user.id}/send_message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
